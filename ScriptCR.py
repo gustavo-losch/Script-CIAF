@@ -4,6 +4,7 @@ import pyautogui
 import time
 import tkinter
 import customtkinter
+import re
 
 def ContasAPagar():
     tabela = tabula.read_pdf("t", pages="all")[0] #PDF Table read and transform to dataframe
@@ -78,14 +79,15 @@ def CRWindow():
 
     def iniciar_processo_cr():
         dataCR = entryCR.get()
-        if len(dataCR) == 10:
+        dataCR = re.sub('[/]', '', dataCR)
+        if len(dataCR) == 8:
             print("Rodar")
-            entryCR.configure(state="disabled")
             erroCR.configure(text="")
             runCR.configure(text="O código ira rodar em 5 segundos.")
+            entryCR.configure(state="disabled")
             time.sleep(5)
 
-            tabela = tabula.read_pdf("Loveggy.pdf", pages="all")[0] #PDF Table read and transform to dataframe (insert PDF path)
+            tabela = tabula.read_pdf("teste2.pdf", pages="all")[0] #PDF Table read and transform to dataframe
             tabela.rename(columns=tabela.iloc[4], inplace = True)
             tabela = tabela[['DOCTO:', 'VENCIMENTO:', 'R$ DEVIDO:']]
             tabela = tabela.drop(0)
@@ -93,8 +95,10 @@ def CRWindow():
             tabela = tabela.drop(2)
             tabela = tabela.drop(3)
             tabela = tabela.drop(4)
+            ultimo = len(tabela) + 4
+            tabela = tabela.drop(ultimo)
 
-            pyautogui.click(984,1055) #Preparing CIAF to recieve the commands
+            pyautogui.click(975,1055) #Preparing CIAF to recieve the commands
             pyautogui.click(23,251)
             time.sleep(1)
 
@@ -103,18 +107,18 @@ def CRWindow():
             cont = 0
 
             for nos in os:
-                pyautogui.click(1382,537) #Sequence of clicks
+                pyautogui.click(1382,537) #Localizar
                 time.sleep(0.5)
-                pyautogui.typewrite(nos)
+                pyautogui.typewrite(nos) #Digitar OS
                 time.sleep(0.5)
-                pyautogui.press('enter')
-                pyautogui.press('enter')
+                pyautogui.press('enter') #Tabular
+                pyautogui.press('enter') #Confirmar Localizar
                 time.sleep(0.5)
-                pyautogui.press('tab')
+                pyautogui.press('tab') #Tabular para não baixar
                 time.sleep(0.5)
-                pyautogui.press('enter')
+                pyautogui.press('enter') #Confirmar não biaxar
                 time.sleep(0.5)
-                pyautogui.click(1381,598)
+                pyautogui.click(1381,598) #Clicar em Baixar
                 time.sleep(0.5)
                 pyautogui.press('tab')
                 time.sleep(0.5)
@@ -126,7 +130,7 @@ def CRWindow():
                 time.sleep(0.5)
                 pyautogui.typewrite(dataCR)
                 time.sleep(0.5)
-                pyautogui.press('tab')
+                ##pyautogui.press('tab')
                 time.sleep(0.5)
                 pyautogui.press('d')
                 time.sleep(0.5)
@@ -151,7 +155,7 @@ def CRWindow():
         else:
             print("errado")
             runCR.configure(text="")
-            erroCR.configure(text="Insira a data novamente.")
+            erroCR.configure(text="Insira a data novamente. (Data Inválida)")
 
     titleCR = customtkinter.CTkLabel(windowCR, text="Baixar Contas a Receber", font=("Berlin Sans FB Demi", 24))
     titleCR.pack(pady=10)
