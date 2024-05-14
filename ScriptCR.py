@@ -176,9 +176,10 @@ principal.deiconify()
 customtkinter.set_appearance_mode("dark")
 principal.title("GScript for CIAF")
 principal.geometry("400x150")
-principal.grid_columnconfigure((0), weight=1)
 
-buttonCR = customtkinter.CTkButton(principal, text="Baixar Contas a Receber", command=CRWindow)
-buttonCR.grid(row=0, column=0, padx=20, pady=20, sticky="ew", columnspan=2)
+titleMain = customtkinter.CTkLabel(principal, text="GScript for CIAF", font=("Berlin Sans FB Demi", 28))
+titleMain.pack(pady=10)
+buttonCR = customtkinter.CTkButton(principal, text="Baixar Contas a Receber", command=CRWindow, width=300)
+buttonCR.pack(pady=20)
 
 principal.mainloop()
