@@ -71,8 +71,8 @@ def ContasAPagar():
         cont = cont + 1 #Line skip
 
 def CRWindow():
-    principal.iconify()
     windowCR = customtkinter.CTkToplevel(principal)
+    principal.iconify()
     windowCR.title("Contas a Receber")
     windowCR.geometry("400x250")
     windowCR.resizable(False, False)
@@ -82,8 +82,7 @@ def CRWindow():
         dataCR = re.sub('[/]', '', dataCR)
         if len(dataCR) == 8:
             print("Rodar")
-            erroCR.configure(text="")
-            runCR.configure(text="O código ira rodar em 5 segundos.")
+            runCR.configure(text="O código irá rodar em 5 segundos.",  text_color="green")
             entryCR.configure(state="disabled")
             time.sleep(5)
 
@@ -154,8 +153,11 @@ def CRWindow():
 
         else:
             print("errado")
-            runCR.configure(text="")
-            erroCR.configure(text="Insira a data novamente. (Data Inválida)")
+            runCR.configure(text="Insira a data novamente. (Data Inválida)", text_color="red")
+
+    def destroy_cr():
+        principal.deiconify()
+        windowCR.destroy()
 
     titleCR = customtkinter.CTkLabel(windowCR, text="Baixar Contas a Receber", font=("Berlin Sans FB Demi", 24))
     titleCR.pack(pady=10)
@@ -163,23 +165,59 @@ def CRWindow():
     labelCR.pack(pady=5)
     entryCR = customtkinter.CTkEntry(windowCR, placeholder_text="                         dia/mes/ano", height=30, width=300, font=("Helvetica", 14), corner_radius=40, text_color="white", state="normal")
     entryCR.pack(pady=0)
-    erroCR = customtkinter.CTkLabel(windowCR, text="", font=("Helvetica", 10), text_color="red")
-    erroCR.pack(pady=1)
     runCR = customtkinter.CTkLabel(windowCR, text="", font=("Helvetica", 10), text_color="green")
     runCR.pack(pady=1)
 
     startCR = customtkinter.CTkButton(windowCR, command=iniciar_processo_cr, text="Iniciar Processo", width=300, height=40, font=("Berlin Sans FB Demi", 18), corner_radius=40)
     startCR.pack(pady=10)
+    destroyCR = customtkinter.CTkButton(windowCR, command=destroy_cr, text="< Voltar", font=("Helvetica", 10, "italic"), fg_color="#242424", text_color="white")
+    destroyCR.place(anchor="center", x=200, y=220)
+
+def TBWindow():
+    windowTB = customtkinter.CTkToplevel(principal)
+    principal.iconify()
+    windowTB.title("Tabela Bergerson")
+    windowTB.geometry("400x300")
+    windowTB.resizable(False, False)
+
+    def destroy_tb():
+        principal.deiconify()
+        windowTB.destroy()
+    
+    def iniciar_processo_tb():
+        datai = entryTB1.get()
+        dataf = entryTB2.get()
+
+
+    titleTB = customtkinter.CTkLabel(windowTB, text="Gerar tabela Bergerson", font=("Berlin Sans FB Demi", 24))
+    titleTB.pack(pady=10)
+    labelCR = customtkinter.CTkLabel(windowTB, text="Insira as datas de intervalo da consulta:", font=("Helvetica", 14))
+    labelCR.pack(pady=5)
+    entryTB1 = customtkinter.CTkEntry(windowTB, placeholder_text="      data inicial", height=30, width=155, font=("Helvetica", 14,"italic"), corner_radius=40, text_color="white", state="normal")
+    entryTB1.place(anchor="center", x=110, y=105)
+    entryTB2 = customtkinter.CTkEntry(windowTB, placeholder_text="       data final", height=30, width=155, font=("Helvetica", 14, "italic"), corner_radius=40, text_color="white", state="normal")
+    entryTB2.place(anchor="center", x=290, y=105)
+
+    destroyCR = customtkinter.CTkButton(windowTB, command=destroy_tb, text="< Voltar", font=("Helvetica", 10, "italic"), width=80, height=30, fg_color="#242424", text_color="white", corner_radius=40)
+    destroyCR.place(anchor="center", x=200, y=275)
+
+def destroy_principal():
+    principal.destroy()
 
 principal = customtkinter.CTk()
 principal.deiconify()
 customtkinter.set_appearance_mode("dark")
 principal.title("GScript for CIAF")
-principal.geometry("400x150")
+principal.geometry("400x300")
+principal.resizable(False, False)
 
 titleMain = customtkinter.CTkLabel(principal, text="GScript for CIAF", font=("Berlin Sans FB Demi", 28))
-titleMain.pack(pady=10)
-buttonCR = customtkinter.CTkButton(principal, text="Baixar Contas a Receber", command=CRWindow, width=300)
-buttonCR.pack(pady=20)
+titleMain.place(anchor="center", x=200, y=40)
+buttonCR = customtkinter.CTkButton(principal, text="Baixar Contas a Receber", command=CRWindow, width=325, height=35, font=("Helvetica", 14), corner_radius=40)
+buttonCR.place(anchor="center", x=200, y=100)
+buttonTAB = customtkinter.CTkButton(principal, text="Tabela Bergerson", command=TBWindow, width=325, height=35, font=("Helvetica", 14), corner_radius=40)
+buttonTAB.place(anchor="center", x=200, y=145)
+destroybtn = customtkinter.CTkButton(principal, text="Encerrar", command=destroy_principal, width=80, height=30, font=("Helvetica", 12, "italic"), corner_radius=40, fg_color="#242424")
+destroybtn.place(anchor="center", x=200, y=275)
 
 principal.mainloop()
