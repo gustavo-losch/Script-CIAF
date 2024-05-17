@@ -197,12 +197,12 @@ def TBWindow():
         datai = entryTB1.get()
         dataf = entryTB2.get()
         # Abrindo arquivo DBF e criando o DataFrame
-        path = ''r'C:\Users\Oficina\Desktop\Gustavo\Repositórios\Script-CIAF\Conversão\ORDEM-SERV.DBF'
+        path = ''r'C:\Users\Gustavo Losch\Documents\Repositórios\Script-CIAF\Conversão\ORDEM-SERV.DBF'
         dbf = DBF(path)
         dataResult = pd.DataFrame(iter(dbf))
 
         #Filtro de colunas e transformando em datetime as datas
-        tabela = dataResult[['NR_ORDEM','NRSERIE', 'DATAFECHA', 'VL_TOTAL', 'CODCLI', 'NOMECLIENT']]
+        tabela = dataResult[['NR_ORDEM','NRSERIE', 'DATAFECHA', 'VL_TOTAL', 'CODCLI', 'NOMECLIENT', 'STATUS']]
         tabela.loc[:, 'DATAFECHA'] = pd.to_datetime(tabela['DATAFECHA'], errors='coerce')
 
         #Inputs dos intervalos de data para aplicar filtro
@@ -212,9 +212,11 @@ def TBWindow():
         #Filtros de cliente e data
         df_filtrado = tabela[(tabela['DATAFECHA'] >= data_inicial) & (tabela['DATAFECHA'] <= data_final)]
         df = df_filtrado[df_filtrado['CODCLI'].str.contains('147')]
+        df = df[df['STATUS'].str.contains('FECHADA')]
 
         #Correção de dados e soma dos valores
         df['DATAFECHA'] = df['DATAFECHA'].fillna(pd.Timestamp('2024-01-01'))
+        df['DATAFECHA'] = pd.to_datetime(df['DATAFECHA'])
         df['DATAFECHA'] = df['DATAFECHA'].dt.strftime('%d/%m/%Y')
         df['VL_TOTAL'] = df['VL_TOTAL'].round(0).astype(int).astype(str) + ',00'
         df['NR_ORDEM'] = df['NR_ORDEM'].round(0).astype(int).astype(str)
@@ -233,7 +235,8 @@ def TBWindow():
         option = optionTB.get()
 
         if option == "Excel":
-            df.to_excel(r"C:\Users\Oficina\Desktop\Extratos Bergerson - GScript\Tabela Bergerson.xlsx", index=False)
+            df.to_excel(r"C:\Users\Gustavo Losch\Desktop\Tabela Bergerson.xlsx", index=False)
+            statusTB.configure(text="Tabela Excel gerada com sucesso.")
         
         elif option == "PDF":
             #Criação do PDF com reportlab
@@ -287,10 +290,11 @@ def TBWindow():
             text_paragraph = Paragraph(text_below_table, subtitle_style)
 
             #Criação do arquivo e build dos elementos
-            doc = SimpleDocTemplate(r"C:\Users\Oficina\Desktop\Extratos Bergerson - GScript\Tabela Bergerson.pdf", pagesize=letter)
+            doc = SimpleDocTemplate(r"C:\Users\Gustavo Losch\Desktop\Tabela Bergerson.pdf", pagesize=letter)
 
             elements = [title, date_range, Spacer(1,35) , table, Spacer(1,15),text_paragraph, Spacer(1,30), footer]
             doc.build(elements)
+            statusTB.configure(text="Tabela PDF gerada com sucesso.")
 
 
     titleTB = customtkinter.CTkLabel(windowTB, text="Gerar tabela Bergerson", font=("Berlin Sans FB Demi", 24))
@@ -306,6 +310,8 @@ def TBWindow():
     optionTB.place(anchor="center", x=200, y=155)
     startTB = customtkinter.CTkButton(windowTB, command=iniciar_processo_tb, text="Gerar Tabela", width=300, height=40, font=("Berlin Sans FB Demi", 18), corner_radius=40)
     startTB.place(anchor="center", x=200, y=210)
+    statusTB = customtkinter.CTkLabel(windowTB, text="",font=("Helvetica", 10), text_color="green")
+    statusTB.place(anchor="center", x=200 ,y=250)
 
 
 
@@ -328,6 +334,8 @@ buttonCR = customtkinter.CTkButton(principal, text="Baixar Contas a Receber", co
 buttonCR.place(anchor="center", x=200, y=100)
 buttonTAB = customtkinter.CTkButton(principal, text="Tabela Bergerson", command=TBWindow, width=325, height=35, font=("Helvetica", 14), corner_radius=40)
 buttonTAB.place(anchor="center", x=200, y=145)
+buttonORC = customtkinter.CTkButton(principal, text="Gerador de Orçamento", width=325, height=35, font=("Helvetica", 14), corner_radius=40)
+buttonORC.place(anchor="center", x=200, y=190)
 destroybtn = customtkinter.CTkButton(principal, text="Encerrar", command=destroy_principal, width=80, height=30, font=("Helvetica", 12, "italic"), corner_radius=40, fg_color="#242424")
 destroybtn.place(anchor="center", x=200, y=275)
 

@@ -10,12 +10,12 @@ from reportlab.lib import colors
 from reportlab.lib.units import inch
 
 # Abrindo arquivo DBF e criando o DataFrame
-path = ''r'C:\Users\Oficina\Desktop\Gustavo\Repositórios\Script-CIAF\Conversão\ORDEM-SERV.DBF'
+path = ''r'C:\Users\Gustavo Losch\Documents\Repositórios\Script-CIAF\Conversão\ORDEM-SERV.DBF'
 dbf = DBF(path)
 dataResult = pd.DataFrame(iter(dbf))
 
 #Filtro de colunas e transformando em datetime as datas
-tabela = dataResult[['NR_ORDEM','NRSERIE', 'DATAFECHA', 'VL_TOTAL', 'CODCLI', 'NOMECLIENT']]
+tabela = dataResult[['NR_ORDEM','NRSERIE', 'DATAFECHA', 'VL_TOTAL', 'CODCLI', 'NOMECLIENT', 'STATUS']]
 tabela.loc[:, 'DATAFECHA'] = pd.to_datetime(tabela['DATAFECHA'], errors='coerce')
 
 datai = "2024-01-30"#input()
@@ -28,9 +28,11 @@ data_final = pd.to_datetime(dataf)
 #Filtros de cliente e data
 df_filtrado = tabela[(tabela['DATAFECHA'] >= data_inicial) & (tabela['DATAFECHA'] <= data_final)]
 df = df_filtrado[df_filtrado['CODCLI'].str.contains('147')]
+df = df[df['STATUS'].str.contains('FECHADA')]
 
 #Correção de dados e soma dos valores
 df['DATAFECHA'] = df['DATAFECHA'].fillna(pd.Timestamp('2024-01-01'))
+df['DATAFECHA'] = pd.to_datetime(df['DATAFECHA'])
 df['DATAFECHA'] = df['DATAFECHA'].dt.strftime('%d/%m/%Y')
 df['VL_TOTAL'] = df['VL_TOTAL'].round(0).astype(int).astype(str) + ',00'
 df['NR_ORDEM'] = df['NR_ORDEM'].round(0).astype(int).astype(str)
@@ -44,7 +46,10 @@ df['OS Bergerson'] = df['NRSERIE'].str[-4:]
 df['OS CIAF'] = df['NR_ORDEM']
 df['Valor'] = df['VL_TOTAL']
 df['Data de Fechamento'] = df['DATAFECHA']
-df = df[['OS CIAF', 'OS Bergerson', 'Data de Fechamento', 'Valor']]
+df['Status'] = df['STATUS']
+df = df[['OS CIAF', 'OS Bergerson', 'Data de Fechamento', 'Valor', 'Status']]
+
+print(df)
 
 #Criação do PDF com reportlab
 styles = getSampleStyleSheet()
