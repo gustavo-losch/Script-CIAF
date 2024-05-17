@@ -3,6 +3,7 @@ import pyautogui
 import time
 import tkinter
 import customtkinter
+from customtkinter import filedialog
 import re
 from dbfread import DBF
 import pandas as pd
@@ -14,6 +15,7 @@ from reportlab.platypus import SimpleDocTemplate, Table, Paragraph, Spacer, Base
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib import colors
 from reportlab.lib.units import inch
+from PIL import Image
 
 def ContasAPagar():
     tabela = tabula.read_pdf("t", pages="all")[0] #PDF Table read and transform to dataframe
@@ -197,7 +199,7 @@ def TBWindow():
         datai = entryTB1.get()
         dataf = entryTB2.get()
         # Abrindo arquivo DBF e criando o DataFrame
-        path = ''r'C:\Users\Gustavo Losch\Documents\Repositórios\Script-CIAF\Conversão\ORDEM-SERV.DBF'
+        path = ''r'C:\Users\Oficina\Desktop\Gustavo\Repositórios\Script-CIAF\Conversão\ORDEM-SERV.DBF'
         dbf = DBF(path)
         dataResult = pd.DataFrame(iter(dbf))
 
@@ -235,7 +237,7 @@ def TBWindow():
         option = optionTB.get()
 
         if option == "Excel":
-            df.to_excel(r"C:\Users\Gustavo Losch\Desktop\Tabela Bergerson.xlsx", index=False)
+            df.to_excel(r"C:\Users\Oficina\Desktop\Extratos Bergerson - GScript\Tabela Bergerson.xlsx", index=False)
             statusTB.configure(text="Tabela Excel gerada com sucesso.")
         
         elif option == "PDF":
@@ -269,7 +271,9 @@ def TBWindow():
 
             table_style = TableStyle([
                 ('ALIGN', (0,0), (-1,-1), 'CENTER'),
-                ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold')
+                ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
+                ('BOX', (0,0), (-1,-1), 1, colors.black),
+                ('GRID', (0,0), (-1,-1), 0.25, colors.grey)
                 ])
 
             #Conteúdo do PDF
@@ -290,7 +294,7 @@ def TBWindow():
             text_paragraph = Paragraph(text_below_table, subtitle_style)
 
             #Criação do arquivo e build dos elementos
-            doc = SimpleDocTemplate(r"C:\Users\Gustavo Losch\Desktop\Tabela Bergerson.pdf", pagesize=letter)
+            doc = SimpleDocTemplate(r"C:\Users\Oficina\Desktop\Extratos Bergerson - GScript\Tabela Bergerson.pdf", pagesize=letter)
 
             elements = [title, date_range, Spacer(1,35) , table, Spacer(1,15),text_paragraph, Spacer(1,30), footer]
             doc.build(elements)
@@ -318,6 +322,63 @@ def TBWindow():
     destroyCR = customtkinter.CTkButton(windowTB, command=destroy_tb, text="< Voltar", font=("Helvetica", 10, "italic"), width=80, height=30, fg_color="#242424", text_color="white", corner_radius=40)
     destroyCR.place(anchor="center", x=200, y=275)
 
+def ORWindow():
+    windowOR = customtkinter.CTkToplevel(principal)
+    principal.iconify()
+    windowOR.title("Orçamento")
+    windowOR.geometry("400x300")
+    windowOR.resizable(False, False)
+
+    def destroy_or():
+        principal.deiconify()
+        windowOR.destroy()
+
+
+    destroyOR = customtkinter.CTkButton(windowOR, command=destroy_or, text="< Voltar", font=("Helvetica", 10, "italic"), width=80, height=30, fg_color="#242424", text_color="white", corner_radius=40)
+    destroyOR.place(anchor="center", x=200, y=275)
+
+def settings():
+    settings = customtkinter.CTkToplevel(principal)
+    principal.iconify()
+    settings.geometry("400x300")
+    settings.resizable(False, False)
+    settings.title("Configurações")
+
+    with open("config.txt", "r") as config:
+        #filepathBG = config.readline().strip()
+        #filepathOR = config.readline().strip()
+        linhas = config.readlines()
+    
+    def destroy_settings():
+        principal.deiconify()
+        settings.destroy()
+
+    def fileselector_CR():
+        linhas[0] = filedialog.askdirectory()
+        with open("config.txt", "w") as config:
+            config.writelines(linhas)
+        savedirCR.configure(text=linhas[0])
+
+    def fileselector_OR():
+        linhas[1] = filedialog.askdirectory()
+        with open("config.txt", "w") as config:
+            config.writelines(linhas)
+        savedirOR.configure(text=linhas[1])
+
+    titleTB = customtkinter.CTkLabel(settings, text="Configurações", font=("Berlin Sans FB Demi", 24))
+    titleTB.place(anchor="center", x=200, y=30)
+    labelCR = customtkinter.CTkLabel(settings, text="Diretório de salvamento Tabela Bergerson", font=("Helvetica", 14))
+    labelCR.place(anchor="center", x=200, y=70)
+    savedirCR = customtkinter.CTkButton(settings, text="", command=fileselector_CR, width=325, height=30, fg_color="#242424", corner_radius=40, border_color="#485F72", border_width=1)
+    savedirCR.place(anchor="center", x=200, y=100)
+    labelOR = customtkinter.CTkLabel(settings, text="Diretório de salvamento Orçamentos", font=("Helvetica", 14))
+    labelOR.place(anchor="center", x=200, y=150)
+    savedirOR = customtkinter.CTkButton(settings, text="", command=fileselector_OR, width=325, height=30, fg_color="#242424", corner_radius=40, border_color="#485F72", border_width=1)
+    savedirOR.place(anchor="center", x=200, y=180)
+    destroysettings = customtkinter.CTkButton(settings, border_color="#485F72", border_width=1, text="< Voltar", command=destroy_settings, width=80, height=30, font=("Helvetica", 12, "italic"), corner_radius=40, fg_color="#242424")
+    destroysettings.place(anchor="center", x=200, y=275)
+
+
 def destroy_principal():
     principal.destroy()
 
@@ -334,9 +395,14 @@ buttonCR = customtkinter.CTkButton(principal, text="Baixar Contas a Receber", co
 buttonCR.place(anchor="center", x=200, y=100)
 buttonTAB = customtkinter.CTkButton(principal, text="Tabela Bergerson", command=TBWindow, width=325, height=35, font=("Helvetica", 14), corner_radius=40)
 buttonTAB.place(anchor="center", x=200, y=145)
-buttonORC = customtkinter.CTkButton(principal, text="Gerador de Orçamento", width=325, height=35, font=("Helvetica", 14), corner_radius=40)
+buttonORC = customtkinter.CTkButton(principal, text="Gerador de Orçamento", command=ORWindow, width=325, height=35, font=("Helvetica", 14), corner_radius=40)
 buttonORC.place(anchor="center", x=200, y=190)
-destroybtn = customtkinter.CTkButton(principal, text="Encerrar", command=destroy_principal, width=80, height=30, font=("Helvetica", 12, "italic"), corner_radius=40, fg_color="#242424")
-destroybtn.place(anchor="center", x=200, y=275)
+destroybtn = customtkinter.CTkButton(principal, border_color="#485F72", border_width=1, text="Encerrar", command=destroy_principal, width=80, height=30, font=("Helvetica", 12, "italic"), corner_radius=40, fg_color="#242424")
+destroybtn.place(anchor="center", x=165, y=275)
+settingsIMG = customtkinter.CTkImage(light_image=Image.open(r"C:\Users\Oficina\Desktop\Gustavo\Repositórios\Script-CIAF\settings.png"),
+                                  dark_image=Image.open(r"C:\Users\Oficina\Desktop\Gustavo\Repositórios\Script-CIAF\settings.png"),
+                                  size=(20, 20))
+settingsbtn = customtkinter.CTkButton(principal, command=settings,border_color="#485F72", border_width=1, text="", width=20, height=30, image=settingsIMG, fg_color="#242424", corner_radius=40)
+settingsbtn.place(anchor="center", x=240, y=275)
 
 principal.mainloop()

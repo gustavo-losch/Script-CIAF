@@ -14,3 +14,4 @@ from reportlab.platypus import SimpleDocTemplate, Table, Paragraph, Spacer, Base
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib import colors
 from reportlab.lib.units import inch
+from PIL import Image
