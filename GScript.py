@@ -16,70 +16,7 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib import colors
 from reportlab.lib.units import inch
 from PIL import Image
-
-def ContasAPagar():
-    tabela = tabula.read_pdf("t", pages="all")[0] #PDF Table read and transform to dataframe
-    tabela.rename(columns=tabela.iloc[4], inplace = True)
-    tabela = tabela[['DOCTO:', 'VENCIMENTO:', 'R$ DEVIDO:']]
-    tabela = tabela.drop(0)
-    tabela = tabela.drop(1)
-    tabela = tabela.drop(2)
-    tabela = tabela.drop(3)
-    tabela = tabela.drop(4)
-
-    pyautogui.click(984,1054) #Preparing CIAF to recieve the commands
-    pyautogui.click(23,251)
-    time.sleep(1)
-
-    os = tabela["DOCTO:"].values #Transforming dataframe to array
-    preco = tabela["R$ DEVIDO:"].values
-    cont = 0
-
-    for nos in os:
-        pyautogui.click(1382,537) #Sequence of clicks
-        time.sleep(0.5)
-        pyautogui.typewrite(nos)
-        time.sleep(0.5)
-        pyautogui.press('enter')
-        pyautogui.press('enter')
-        time.sleep(0.5)
-        pyautogui.press('tab')
-        time.sleep(0.5)
-        pyautogui.press('enter')
-        time.sleep(0.5)
-        pyautogui.click(1381,598)
-        time.sleep(0.5)
-        pyautogui.press('tab')
-        time.sleep(0.5)
-        pyautogui.press('enter')
-        time.sleep(0.5)
-        pyautogui.press('tab')
-        time.sleep(0.5)
-        pyautogui.press('tab') #data
-        time.sleep(0.5)
-        pyautogui.typewrite(dataCR)
-        time.sleep(0.5)
-        pyautogui.press('tab')
-        time.sleep(0.5)
-        pyautogui.press('d')
-        time.sleep(0.5)
-        pyautogui.press('tab')
-        time.sleep(0.5)
-        pyautogui.press('tab')
-        time.sleep(0.5)
-        pyautogui.press('tab')
-        time.sleep(0.5)
-        pyautogui.typewrite(tabela.iloc[cont,2])
-        time.sleep(0.5)
-        pyautogui.press('enter')
-        time.sleep(0.5)
-        pyautogui.click(953,590)
-        time.sleep(1)
-
-        print(nos)
-        print(tabela.iloc[cont,2])
-
-        cont = cont + 1 #Line skip
+import shutil
 
 def CRWindow():
     windowCR = customtkinter.CTkToplevel(principal)
@@ -326,16 +263,30 @@ def ORWindow():
     windowOR = customtkinter.CTkToplevel(principal)
     principal.iconify()
     windowOR.title("Orçamento")
-    windowOR.geometry("400x300")
+    windowOR.geometry("1280x720")
     windowOR.resizable(False, False)
 
     def destroy_or():
         principal.deiconify()
         windowOR.destroy()
 
+    top_frame = customtkinter.CTkFrame(master=windowOR, width=500, height=150, corner_radius=40)
+    top_frame.grid(row=0,column=0, pady=(20,10), padx=(20,10), sticky="w")
+    framelabel = customtkinter.CTkLabel(top_frame, text="Orçamento",fg_color="#2b2b2b", font=("Berlin Sans FB Demi", 20))
+    framelabel.grid(row=0, column=0, padx=10,pady=10,sticky="w")
+    n_orc = customtkinter.CTkSpinbo
+    
+
+    h_frame = customtkinter.CTkFrame(master=windowOR, width=280, height=150, corner_radius=40)
+    h_frame.grid(row=1,column=0, pady=10, padx=20, sticky="w")
+
+    m_frame = customtkinter.CTkFrame(master=windowOR, width=280, height=300, corner_radius=40)
+    m_frame.grid(row=2,column=0, pady=10, padx=20, sticky="w")
+
+
 
     destroyOR = customtkinter.CTkButton(windowOR, command=destroy_or, text="< Voltar", font=("Helvetica", 10, "italic"), width=80, height=30, fg_color="#242424", text_color="white", corner_radius=40)
-    destroyOR.place(anchor="center", x=200, y=275)
+    destroyOR.grid(row=3,column=0, pady=5, padx=10)
 
 def settings():
     settings = customtkinter.CTkToplevel(principal)
@@ -345,8 +296,6 @@ def settings():
     settings.title("Configurações")
 
     with open("config.txt", "r") as config:
-        #filepathBG = config.readline().strip()
-        #filepathOR = config.readline().strip()
         linhas = config.readlines()
     
     def destroy_settings():
@@ -356,13 +305,21 @@ def settings():
     def fileselector_CR():
         linhas[0] = filedialog.askdirectory()
         with open("config.txt", "w") as config:
-            config.writelines(linhas)
-        savedirCR.configure(text=linhas[0])
+            config.write(linhas[0])
+            config.write('\n')
+            config.write(linhas[1])
+            config.write('\n')
+            config.write(linhas[2])
+            savedirCR.configure(text=linhas[0])
 
     def fileselector_OR():
         linhas[1] = filedialog.askdirectory()
         with open("config.txt", "w") as config:
-            config.writelines(linhas)
+            config.write(linhas[0])
+            config.write('\n')
+            config.write(linhas[1])
+            config.write('\n')
+            config.write(linhas[2])
         savedirOR.configure(text=linhas[1])
 
     titleTB = customtkinter.CTkLabel(settings, text="Configurações", font=("Berlin Sans FB Demi", 24))
@@ -378,6 +335,8 @@ def settings():
     destroysettings = customtkinter.CTkButton(settings, border_color="#485F72", border_width=1, text="< Voltar", command=destroy_settings, width=80, height=30, font=("Helvetica", 12, "italic"), corner_radius=40, fg_color="#242424")
     destroysettings.place(anchor="center", x=200, y=275)
 
+    savedirCR.configure(text=linhas[0])
+    savedirOR.configure(text=linhas[1])
 
 def destroy_principal():
     principal.destroy()
@@ -399,10 +358,13 @@ buttonORC = customtkinter.CTkButton(principal, text="Gerador de Orçamento", com
 buttonORC.place(anchor="center", x=200, y=190)
 destroybtn = customtkinter.CTkButton(principal, border_color="#485F72", border_width=1, text="Encerrar", command=destroy_principal, width=80, height=30, font=("Helvetica", 12, "italic"), corner_radius=40, fg_color="#242424")
 destroybtn.place(anchor="center", x=165, y=275)
-settingsIMG = customtkinter.CTkImage(light_image=Image.open(r"C:\Users\Oficina\Desktop\Gustavo\Repositórios\Script-CIAF\settings.png"),
-                                  dark_image=Image.open(r"C:\Users\Oficina\Desktop\Gustavo\Repositórios\Script-CIAF\settings.png"),
+settingsIMG = customtkinter.CTkImage(light_image=Image.open(r"C:\Users\Gustavo Losch\Documents\Repositórios\Script-CIAF\settings.png"),
+                                  dark_image=Image.open(r"C:\Users\Gustavo Losch\Documents\Repositórios\Script-CIAF\settings.png"),
                                   size=(20, 20))
 settingsbtn = customtkinter.CTkButton(principal, command=settings,border_color="#485F72", border_width=1, text="", width=20, height=30, image=settingsIMG, fg_color="#242424", corner_radius=40)
 settingsbtn.place(anchor="center", x=240, y=275)
+
+shutil.copy(r"C:/Ciaf/Dados/ORDEM-SERV.DBF", r"C:\Users\Gustavo Losch\Documents\Repositórios\Script-CIAF\ciaf-files")
+shutil.copy(r"C:/Ciaf/Dados/ordem-serv.FPT", r"C:\Users\Gustavo Losch\Documents\Repositórios\Script-CIAF\ciaf-files")
 
 principal.mainloop()
