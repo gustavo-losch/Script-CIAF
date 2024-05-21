@@ -271,11 +271,18 @@ def ORWindow():
         windowOR.destroy()
 
     top_frame = customtkinter.CTkFrame(master=windowOR, width=500, height=150, corner_radius=40)
-    top_frame.grid(row=0,column=0, pady=(20,10), padx=(20,10), sticky="w")
-    framelabel = customtkinter.CTkLabel(top_frame, text="Orçamento",fg_color="#2b2b2b", font=("Berlin Sans FB Demi", 20))
-    framelabel.grid(row=0, column=0, padx=10,pady=10,sticky="w")
-    n_orc = customtkinter.CTkSpinbo
-    
+    top_frame.grid(y=30, x=30, sticky="nw")
+    n_or = customtkinter.CTkButton(top_frame, text="Orçamento",width=200, height=50, fg_color="#242424", border_color="#1f6aa5", border_width=1, corner_radius=40, font=("Berlin Sans FB Demi", 22), hover=False).grid(row=0,column=0,sticky="w", padx=(10,2), pady=(10,5))
+    n_or = customtkinter.CTkButton(top_frame, text="0001",width=80, height=50, corner_radius=40, fg_color="#1f6aa5",font=("Helvetica", 20, "bold"), hover=False).grid(row=0,column=1,sticky="e", padx=(2,10), pady=10)
+    labelemissao = customtkinter.CTkLabel(top_frame, text="Data da emissão:", font=("Helvetica", 14))
+    labelemissao.grid(row=1,column=0,pady=(5,0),padx=(10,5))
+    entry_dataemissao = customtkinter.CTkEntry(top_frame, placeholder_text="         /  /  ", height=30, width=130, font=("Helvetica", 14,"italic"), corner_radius=40, text_color="white", state="normal")
+    entry_dataemissao.grid(row=2,column=0,pady=(2,10),padx=(10,5))
+    labelvalidade = customtkinter.CTkLabel(top_frame, text="Válido até:", font=("Helvetica", 14))
+    labelvalidade.grid(row=1,column=1,pady=(5,0),padx=(5,10))
+    entry_datavalidade = customtkinter.CTkEntry(top_frame, placeholder_text="         /  /  ", height=30, width=130, font=("Helvetica", 14,"italic"), corner_radius=40, text_color="white", state="normal")
+    entry_datavalidade.grid(row=2,column=1,pady=(2,10),padx=(5,10))
+
 
     h_frame = customtkinter.CTkFrame(master=windowOR, width=280, height=150, corner_radius=40)
     h_frame.grid(row=1,column=0, pady=10, padx=20, sticky="w")
