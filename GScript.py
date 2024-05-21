@@ -1,6 +1,7 @@
 import tabula
 import pyautogui
 import time
+from datetime import *
 import tkinter
 import customtkinter
 from customtkinter import filedialog
@@ -264,36 +265,40 @@ def ORWindow():
     principal.iconify()
     windowOR.title("Orçamento")
     windowOR.geometry("1280x720")
-    windowOR.resizable(False, False)
+    windowOR.resizable(True,True)
 
+    today = datetime.now()
+    data_atual = today.strftime("%d/%m/%Y")
+    validade = today+timedelta(7)
+    data_validade = validade.strftime("%d/%m/%Y")
+    
     def destroy_or():
         principal.deiconify()
         windowOR.destroy()
 
-    top_frame = customtkinter.CTkFrame(master=windowOR, width=500, height=150, corner_radius=40)
-    top_frame.grid(y=30, x=30, sticky="nw")
-    n_or = customtkinter.CTkButton(top_frame, text="Orçamento",width=200, height=50, fg_color="#242424", border_color="#1f6aa5", border_width=1, corner_radius=40, font=("Berlin Sans FB Demi", 22), hover=False).grid(row=0,column=0,sticky="w", padx=(10,2), pady=(10,5))
-    n_or = customtkinter.CTkButton(top_frame, text="0001",width=80, height=50, corner_radius=40, fg_color="#1f6aa5",font=("Helvetica", 20, "bold"), hover=False).grid(row=0,column=1,sticky="e", padx=(2,10), pady=10)
-    labelemissao = customtkinter.CTkLabel(top_frame, text="Data da emissão:", font=("Helvetica", 14))
-    labelemissao.grid(row=1,column=0,pady=(5,0),padx=(10,5))
-    entry_dataemissao = customtkinter.CTkEntry(top_frame, placeholder_text="         /  /  ", height=30, width=130, font=("Helvetica", 14,"italic"), corner_radius=40, text_color="white", state="normal")
-    entry_dataemissao.grid(row=2,column=0,pady=(2,10),padx=(10,5))
-    labelvalidade = customtkinter.CTkLabel(top_frame, text="Válido até:", font=("Helvetica", 14))
-    labelvalidade.grid(row=1,column=1,pady=(5,0),padx=(5,10))
-    entry_datavalidade = customtkinter.CTkEntry(top_frame, placeholder_text="         /  /  ", height=30, width=130, font=("Helvetica", 14,"italic"), corner_radius=40, text_color="white", state="normal")
-    entry_datavalidade.grid(row=2,column=1,pady=(2,10),padx=(5,10))
+    top_frame = customtkinter.CTkFrame(master=windowOR, width=375, height=150, corner_radius=40)
+    top_frame.place(y=30, x=30, anchor="nw")
+    n_or = customtkinter.CTkButton(top_frame, text="Orçamento",width=200, height=50, fg_color="#242424", border_color="#1f6aa5", border_width=1, corner_radius=40, font=("Berlin Sans FB Demi", 22), hover=False).place(y=40, x=120, anchor="center")
+    n_or = customtkinter.CTkButton(top_frame, text="0001",width=80, height=50, corner_radius=40, fg_color="#1f6aa5",font=("Arial", 20, "bold"), hover=False).place(y=40, x=306, anchor="center")
+    labelemissao = customtkinter.CTkLabel(top_frame, text="Data da emissão:", font=("Helvetica", 12))
+    labelemissao.place(y=90, x=100, anchor="center")
+    entry_dataemissao = customtkinter.CTkEntry(top_frame, placeholder_text="         /       /  ", height=30, width=150, font=("Helvetica", 14,"italic"), corner_radius=40, text_color="white", state="normal")
+    entry_dataemissao.place(y=120, x=100, anchor="center")
+    entry_dataemissao.insert(0, data_atual)
+    labelvalidade = customtkinter.CTkLabel(top_frame, text="Válido até:", font=("Helvetica", 12))
+    labelvalidade.place(y=90, x=280, anchor="center")
+    entry_datavalidade = customtkinter.CTkEntry(top_frame, placeholder_text="         /       /  ", height=30, width=150, font=("Helvetica", 14,"italic"), corner_radius=40, text_color="white", state="normal")
+    entry_datavalidade.place(y=120, x=280, anchor="center")
+    entry_datavalidade.insert(0, data_validade)
 
 
-    h_frame = customtkinter.CTkFrame(master=windowOR, width=280, height=150, corner_radius=40)
-    h_frame.grid(row=1,column=0, pady=10, padx=20, sticky="w")
+    h_frame = customtkinter.CTkFrame(master=windowOR, width=375, height=150, corner_radius=40)
+    h_frame.place(x=30,y=190,anchor="nw")
+    nome_cliente = customtkinter.CTkEntry(h_frame, placeholder_text="               Nome do Cliente",width=335, height=40, fg_color="#242424", border_color="#1f6aa5", border_width=1, corner_radius=40, font=("Berlin Sans FB Demi", 18)).place(y=35, x=187, anchor="center")
 
     m_frame = customtkinter.CTkFrame(master=windowOR, width=280, height=300, corner_radius=40)
-    m_frame.grid(row=2,column=0, pady=10, padx=20, sticky="w")
-
-
 
     destroyOR = customtkinter.CTkButton(windowOR, command=destroy_or, text="< Voltar", font=("Helvetica", 10, "italic"), width=80, height=30, fg_color="#242424", text_color="white", corner_radius=40)
-    destroyOR.grid(row=3,column=0, pady=5, padx=10)
 
 def settings():
     settings = customtkinter.CTkToplevel(principal)
