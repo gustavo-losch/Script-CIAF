@@ -1,0 +1,38 @@
+Informações do Orçamento:
+-Nº Orçamento
+-Data emissão
+-Válido até (7 dias)
+
+Informações do Cliente:
+-Nome
+-Telefone
+-CPF/CNPJ
+_________________________________________________
+Projeto
+-Descrição
+
+Horas gastas:
+-Desenho
+-Molde em cera
+-Fundição
+-Laminação
+-Soldas
+-Acabamentos
+-Polimento
+-Limpeza
+-Cravação de pedras
+-Polimento final
+
+Material:
+-Ouro 1000
+-Ouro 750
+-Ouro Branco
+-Pedras
+-Prata
+-Borracha Silicone
+-Ródio
+-Serviços de Terceiros
+
+Preços:
+-Preço por hora trabalhada
+-Cotação do metal utilizado

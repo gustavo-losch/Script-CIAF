@@ -18,6 +18,7 @@ from reportlab.lib import colors
 from reportlab.lib.units import inch
 from PIL import Image
 import shutil
+import csv
 
 def CRWindow():
     windowCR = customtkinter.CTkToplevel(principal)
@@ -267,11 +268,59 @@ def ORWindow():
     windowOR.geometry("1280x720")
     windowOR.resizable(True,True)
 
+    global clientes
+    global nomes_clientes  
+    global telefone_clientes  
+    global cpf_clientes
+
     today = datetime.now()
     data_atual = today.strftime("%d/%m/%Y")
     validade = today+timedelta(7)
     data_validade = validade.strftime("%d/%m/%Y")
     
+    with open("clientes.csv", "r") as arquivo:
+        reader = csv.DictReader(arquivo)
+        for row in reader:
+            clientes.append(row)
+
+    nomes_clientes = [cliente['nome'] for cliente in clientes]
+    telefone_clientes = [cliente['telefone'] for cliente in clientes]
+    cpf_clientes = [cliente['cpf'] for cliente in clientes]
+
+    def adicionar_cliente_cmd():
+        global clientes
+        global nomes_clientes  
+        global telefone_clientes  
+        global cpf_clientes  
+        nome = nome_cliente.get()
+        telefone = entry_telefone.get()
+        cpf = entry_cpf.get()
+        adicionar_cliente(nome, telefone, cpf)
+        nomes_clientes = [cliente['nome'] for cliente in clientes]  
+        telefone_clientes = [cliente['telefone'] for cliente in clientes]  
+        cpf_clientes = [cliente['cpf'] for cliente in clientes]  
+        nome_cliente.configure(values=nomes_clientes)
+
+    def adicionar_cliente(nome, telefone, cpf):
+        cliente = {"nome": nome, "telefone": telefone, "cpf": cpf}
+        clientes.append(cliente)
+
+        with open("clientes.csv", mode='w', newline='') as arquivo:
+            writer = csv.DictWriter(arquivo, fieldnames=["nome", "telefone", "cpf"])
+            writer.writeheader()
+            for cliente in clientes:
+                writer.writerow(cliente)
+    
+
+    def preencher_campos(event):
+        idx = nomes_clientes.index(nome_cliente.get())
+        telefone = telefone_clientes[idx]
+        cpf = cpf_clientes[idx]
+        entry_telefone.delete(0, 'end')
+        entry_telefone.insert(0, telefone)
+        entry_cpf.delete(0, 'end')
+        entry_cpf.insert(0, cpf)
+
     def destroy_or():
         principal.deiconify()
         windowOR.destroy()
@@ -282,21 +331,29 @@ def ORWindow():
     n_or = customtkinter.CTkButton(top_frame, text="0001",width=80, height=50, corner_radius=40, fg_color="#1f6aa5",font=("Arial", 20, "bold"), hover=False).place(y=40, x=306, anchor="center")
     labelemissao = customtkinter.CTkLabel(top_frame, text="Data da emissão:", font=("Helvetica", 12))
     labelemissao.place(y=90, x=100, anchor="center")
-    entry_dataemissao = customtkinter.CTkEntry(top_frame, placeholder_text="         /       /  ", height=30, width=150, font=("Helvetica", 14,"italic"), corner_radius=40, text_color="white", state="normal")
+    entry_dataemissao = customtkinter.CTkEntry(top_frame,justify="center", placeholder_text="  /  /  ", height=30, width=150, font=("Helvetica", 14,"italic"), corner_radius=40, text_color="white", state="normal")
     entry_dataemissao.place(y=120, x=100, anchor="center")
     entry_dataemissao.insert(0, data_atual)
     labelvalidade = customtkinter.CTkLabel(top_frame, text="Válido até:", font=("Helvetica", 12))
     labelvalidade.place(y=90, x=280, anchor="center")
-    entry_datavalidade = customtkinter.CTkEntry(top_frame, placeholder_text="         /       /  ", height=30, width=150, font=("Helvetica", 14,"italic"), corner_radius=40, text_color="white", state="normal")
+    entry_datavalidade = customtkinter.CTkEntry(top_frame,justify="center", placeholder_text="  /  /  ", height=30, width=150, font=("Helvetica", 14,"italic"), corner_radius=40, text_color="white", state="normal")
     entry_datavalidade.place(y=120, x=280, anchor="center")
     entry_datavalidade.insert(0, data_validade)
 
-
-    h_frame = customtkinter.CTkFrame(master=windowOR, width=375, height=150, corner_radius=40)
+    h_frame = customtkinter.CTkFrame(master=windowOR, width=375, height=190, corner_radius=40)
     h_frame.place(x=30,y=190,anchor="nw")
-    nome_cliente = customtkinter.CTkEntry(h_frame, placeholder_text="               Nome do Cliente",width=335, height=40, fg_color="#242424", border_color="#1f6aa5", border_width=1, corner_radius=40, font=("Berlin Sans FB Demi", 18)).place(y=35, x=187, anchor="center")
-
-    m_frame = customtkinter.CTkFrame(master=windowOR, width=280, height=300, corner_radius=40)
+    nome_cliente = customtkinter.CTkComboBox(h_frame, command=preencher_campos, values=nomes_clientes ,width=335, height=40, fg_color="#242424", border_color="#1f6aa5", border_width=1, corner_radius=40, font=("Berlin Sans FB Demi", 18), button_color="#1f6aa5", justify="center")
+    nome_cliente.place(y=35, x=187, anchor="center")
+    nome_cliente.set("Nome do Cliente")
+    labelTelefone = customtkinter.CTkLabel(h_frame, text="Telefone:", font=("Helvetica", 12))
+    labelTelefone.place(y=80, x=100, anchor="center")
+    entry_telefone = customtkinter.CTkEntry(h_frame, placeholder_text="(  )            -    ", height=30, width=150, font=("Helvetica", 14,"italic"), corner_radius=40, text_color="white", state="normal")
+    entry_telefone.place(y=110, x=100, anchor="center")
+    labelcpf = customtkinter.CTkLabel(h_frame, text="CPF/CNPJ", font=("Helvetica", 12))
+    labelcpf.place(y=80, x=280, anchor="center")
+    entry_cpf = customtkinter.CTkEntry(h_frame,justify="center", placeholder_text="", height=30, width=150, font=("Helvetica", 14,"italic"), corner_radius=40, text_color="white", state="normal")
+    entry_cpf.place(y=110, x=280, anchor="center")
+    addcliente = customtkinter.CTkButton(h_frame,text="Adicionar Cliente", command=adicionar_cliente_cmd, width=335, height=30, corner_radius=40, font=("Helvetica", 14,"bold")).place(x=187,y=155,anchor="center")
 
     destroyOR = customtkinter.CTkButton(windowOR, command=destroy_or, text="< Voltar", font=("Helvetica", 10, "italic"), width=80, height=30, fg_color="#242424", text_color="white", corner_radius=40)
 
@@ -378,5 +435,6 @@ settingsbtn.place(anchor="center", x=240, y=275)
 
 shutil.copy(r"C:/Ciaf/Dados/ORDEM-SERV.DBF", r"C:\Users\Gustavo Losch\Documents\Repositórios\Script-CIAF\ciaf-files")
 shutil.copy(r"C:/Ciaf/Dados/ordem-serv.FPT", r"C:\Users\Gustavo Losch\Documents\Repositórios\Script-CIAF\ciaf-files")
+clientes = []
 
 principal.mainloop()
