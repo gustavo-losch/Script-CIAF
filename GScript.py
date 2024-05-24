@@ -265,7 +265,7 @@ def ORWindow():
     windowOR = customtkinter.CTkToplevel(principal)
     principal.iconify()
     windowOR.title("Orçamento")
-    windowOR.geometry("1280x720")
+    windowOR.geometry("1600x720")
     windowOR.resizable(True,True)
 
     global clientes
@@ -286,6 +286,18 @@ def ORWindow():
     nomes_clientes = [cliente['nome'] for cliente in clientes]
     telefone_clientes = [cliente['telefone'] for cliente in clientes]
     cpf_clientes = [cliente['cpf'] for cliente in clientes]
+
+    def search(event):
+        value = event.widget.get()
+        if value == '':
+            nome_cliente['values'] = nomes_clientes
+        else:
+            filtro = []
+            for item in nomes_clientes:
+                if value.lower() in item.lower():
+                    filtro.append(item)
+            nome_cliente.configure(values=filtro)
+
 
     def adicionar_cliente_cmd():
         global clientes
@@ -310,7 +322,6 @@ def ORWindow():
             writer.writeheader()
             for cliente in clientes:
                 writer.writerow(cliente)
-    
 
     def preencher_campos(event):
         idx = nomes_clientes.index(nome_cliente.get())
@@ -321,13 +332,38 @@ def ORWindow():
         entry_cpf.delete(0, 'end')
         entry_cpf.insert(0, cpf)
 
+    def switch_tempo():
+        medida = tempo.get()
+        if medida == "Horas":
+            tempo.configure(text="Unidade de Tempo: Horas")
+            entry_prototp.configure(placeholder_text="Horas")
+            entry_desenho.configure(placeholder_text="Horas")
+            entry_molde.configure(placeholder_text="Horas")
+            fundicao_entry.configure(placeholder_text="Horas")
+            montagem_entry.configure(placeholder_text="Horas")
+            acabamentos_entry.configure(placeholder_text="Horas")
+            polimento_entry.configure(placeholder_text="Horas")
+            limpeza_entry.configure(placeholder_text="Horas")
+            cravacao_entry.configure(placeholder_text="Horas")
+        else:
+            tempo.configure(text="Unidade de Tempo: Minutos")
+            entry_prototp.configure(placeholder_text="Minutos")
+            entry_desenho.configure(placeholder_text="Minutos")
+            entry_molde.configure(placeholder_text="Minutos")
+            fundicao_entry.configure(placeholder_text="Minutos")
+            montagem_entry.configure(placeholder_text="Minutos")
+            acabamentos_entry.configure(placeholder_text="Minutos")
+            polimento_entry.configure(placeholder_text="Minutos")
+            limpeza_entry.configure(placeholder_text="Minutos")
+            cravacao_entry.configure(placeholder_text="Minutos")
+
     def destroy_or():
         principal.deiconify()
         windowOR.destroy()
 
     top_frame = customtkinter.CTkFrame(master=windowOR, width=375, height=150, corner_radius=40)
     top_frame.place(y=30, x=30, anchor="nw")
-    n_or = customtkinter.CTkButton(top_frame, text="Orçamento",width=200, height=50, fg_color="#242424", border_color="#1f6aa5", border_width=1, corner_radius=40, font=("Berlin Sans FB Demi", 22), hover=False).place(y=40, x=120, anchor="center")
+    title_label = customtkinter.CTkButton(top_frame, text="Orçamento",width=200, height=50, fg_color="#242424", border_color="#1f6aa5", border_width=1, corner_radius=40, font=("Berlin Sans FB Demi", 22), hover=False).place(y=40, x=120, anchor="center")
     n_or = customtkinter.CTkButton(top_frame, text="0001",width=80, height=50, corner_radius=40, fg_color="#1f6aa5",font=("Arial", 20, "bold"), hover=False).place(y=40, x=306, anchor="center")
     labelemissao = customtkinter.CTkLabel(top_frame, text="Data da emissão:", font=("Helvetica", 12))
     labelemissao.place(y=90, x=100, anchor="center")
@@ -345,17 +381,87 @@ def ORWindow():
     nome_cliente = customtkinter.CTkComboBox(h_frame, command=preencher_campos, values=nomes_clientes ,width=335, height=40, fg_color="#242424", border_color="#1f6aa5", border_width=1, corner_radius=40, font=("Berlin Sans FB Demi", 18), button_color="#1f6aa5", justify="center")
     nome_cliente.place(y=35, x=187, anchor="center")
     nome_cliente.set("Nome do Cliente")
+    nome_cliente.bind("<FocusIn>", lambda e: nome_cliente.set(""))
+    nome_cliente.bind("<FocusOut>", lambda e: nome_cliente.set("Nome do Cliente"))
+    nome_cliente.bind("<KeyRelease>",search)
     labelTelefone = customtkinter.CTkLabel(h_frame, text="Telefone:", font=("Helvetica", 12))
     labelTelefone.place(y=80, x=100, anchor="center")
     entry_telefone = customtkinter.CTkEntry(h_frame, placeholder_text="(  )            -    ", height=30, width=150, font=("Helvetica", 14,"italic"), corner_radius=40, text_color="white", state="normal")
     entry_telefone.place(y=110, x=100, anchor="center")
     labelcpf = customtkinter.CTkLabel(h_frame, text="CPF/CNPJ", font=("Helvetica", 12))
     labelcpf.place(y=80, x=280, anchor="center")
-    entry_cpf = customtkinter.CTkEntry(h_frame,justify="center", placeholder_text="", height=30, width=150, font=("Helvetica", 14,"italic"), corner_radius=40, text_color="white", state="normal")
+    entry_cpf = customtkinter.CTkEntry(h_frame, placeholder_text="       .       .      -", height=30, width=150, font=("Helvetica", 14,"italic"), corner_radius=40, text_color="white", state="normal")
     entry_cpf.place(y=110, x=280, anchor="center")
     addcliente = customtkinter.CTkButton(h_frame,text="Adicionar Cliente", command=adicionar_cliente_cmd, width=335, height=30, corner_radius=40, font=("Helvetica", 14,"bold")).place(x=187,y=155,anchor="center")
 
+    description_frame = customtkinter.CTkFrame(master=windowOR, width=375, height=250, corner_radius=40)
+    description_frame.place(anchor="nw", x=30, y=390)
+    material_label= customtkinter.CTkButton(description_frame, text="Descrição do Orçamento",width=334, height=40, fg_color="#242424", border_color="#1f6aa5", border_width=1, corner_radius=40, font=("Berlin Sans FB Demi", 18), hover=False)
+    material_label.place(y=35, x=187, anchor="center")
+    description_textbox = customtkinter.CTkTextbox(description_frame, width=334, height=160, corner_radius=20, fg_color="#242424", border_spacing=0)
+    description_textbox.place(x=187, y=152, anchor="center")
+
+    hours_frame = customtkinter.CTkFrame(master=windowOR, width=375, height= 610, corner_radius=40)
+    hours_frame.place(anchor="nw", x=415, y=30)
+    hourswrk_label = customtkinter.CTkButton(hours_frame, text="Tempo Trabalhado",width=334, height=40, fg_color="#242424", border_color="#F2A104", border_width=1, corner_radius=40, font=("Berlin Sans FB Demi", 18), hover=False)
+    hourswrk_label.place(y=35, x=187, anchor="center")
+    tempo_inframe = customtkinter.CTkScrollableFrame(master=hours_frame, fg_color="#242424", width=295, height=485, corner_radius=20,border_color="#F2A104", border_width=1)
+    tempo_inframe.place(anchor="center", x=187, y=330)
+
+    switch_frame = customtkinter.CTkFrame(master=tempo_inframe, width=275, height=40, corner_radius=10, fg_color="#F2A104")
+    switch_frame.pack(pady=(10,5))
+    tempo_var = customtkinter.StringVar(value="Horas")
+    tempo = customtkinter.CTkSwitch(master=switch_frame, width=260, text="Unidade de Tempo: Horas", command=switch_tempo, onvalue="Horas", offvalue="Minutos", progress_color="#242424", variable=tempo_var, font=("Helvetica", 14, "bold"))
+    tempo.pack(pady=5, padx=5)
+
+    prototp_label = customtkinter.CTkLabel(tempo_inframe, text="Prototipagem:", font=("Helvetica",14,"bold"))
+    prototp_label.pack(pady=(10,5), padx=(3,5))
+    entry_prototp = customtkinter.CTkEntry(tempo_inframe, placeholder_text="minutos", justify="center", height=30, width=275, font=("Helvetica", 14,"bold"), corner_radius=40, border_color="#565b5e", border_width=1, text_color="white", state="normal")
+    entry_prototp.pack(pady=(5,10), padx=(3,5))
+
+    desenho_label = customtkinter.CTkLabel(tempo_inframe, text="Desenho:", font=("Helvetica",14,"bold"))
+    desenho_label.pack(pady=(10,5), padx=(3,5))
+    entry_desenho = customtkinter.CTkEntry(tempo_inframe, placeholder_text="minutos", justify="center", height=30, width=275, font=("Helvetica", 14,"bold"), corner_radius=40, border_color="#565b5e", border_width=1, text_color="white", state="normal")
+    entry_desenho.pack(pady=(5,10), padx=(3,5))
+
+    molde_label = customtkinter.CTkLabel(tempo_inframe, text="Molde em Cera:", font=("Helvetica",14,"bold"))
+    molde_label.pack(pady=(10,5), padx=(3,5))
+    entry_molde = customtkinter.CTkEntry(tempo_inframe, placeholder_text="minutos", justify="center", height=30, width=275, font=("Helvetica", 14,"bold"), corner_radius=40, border_color="#565b5e", border_width=1, text_color="white", state="normal")
+    entry_molde.pack(pady=(5,10), padx=(3,5))
+    
+    fundicao_label = customtkinter.CTkLabel(tempo_inframe, text="Fundição:", font=("Helvetica",14,"bold"))
+    fundicao_label.pack(pady=(10,5), padx=(3,5))
+    fundicao_entry = customtkinter.CTkEntry(tempo_inframe, placeholder_text="minutos", justify="center", height=30, width=275, font=("Helvetica", 14,"bold"), corner_radius=40, border_color="#565b5e", border_width=1, text_color="white", state="normal")
+    fundicao_entry.pack(pady=(5,10), padx=(3,5))
+
+    montagem_label = customtkinter.CTkLabel(tempo_inframe, text="Montagem:", font=("Helvetica",14,"bold"))
+    montagem_label.pack(pady=(10,5), padx=(3,5))
+    montagem_entry = customtkinter.CTkEntry(tempo_inframe, placeholder_text="minutos", justify="center", height=30, width=275, font=("Helvetica", 14,"bold"), corner_radius=40, border_color="#565b5e", border_width=1, text_color="white", state="normal")
+    montagem_entry.pack(pady=(5,10), padx=(3,5))
+
+    acabamentos_label = customtkinter.CTkLabel(tempo_inframe, text="Acabamentos:", font=("Helvetica",14,"bold"))
+    acabamentos_label.pack(pady=(10,5), padx=(3,5))
+    acabamentos_entry = customtkinter.CTkEntry(tempo_inframe, placeholder_text="minutos", justify="center", height=30, width=275, font=("Helvetica", 14,"bold"), corner_radius=40, border_color="#565b5e", border_width=1, text_color="white", state="normal")
+    acabamentos_entry.pack(pady=(5,10), padx=(3,5))
+
+    polimento_label = customtkinter.CTkLabel(tempo_inframe, text="Polimento:", font=("Helvetica",14,"bold"))
+    polimento_label.pack(pady=(10,5), padx=(3,5))
+    polimento_entry = customtkinter.CTkEntry(tempo_inframe, placeholder_text="minutos", justify="center", height=30, width=275, font=("Helvetica", 14,"bold"), corner_radius=40, border_color="#565b5e", border_width=1, text_color="white", state="normal")
+    polimento_entry.pack(pady=(5,10), padx=(3,5))
+
+    limpeza_label = customtkinter.CTkLabel(tempo_inframe, text="Limpeza:", font=("Helvetica",14,"bold"))
+    limpeza_label.pack(pady=(10,5), padx=(3,5))
+    limpeza_entry = customtkinter.CTkEntry(tempo_inframe, placeholder_text="minutos", justify="center", height=30, width=275, font=("Helvetica", 14,"bold"), corner_radius=40, border_color="#565b5e", border_width=1, text_color="white", state="normal")
+    limpeza_entry.pack(pady=(5,10), padx=(3,5))
+
+    cravacao_label = customtkinter.CTkLabel(tempo_inframe, text="Cravação:", font=("Helvetica",14,"bold"))
+    cravacao_label.pack(pady=(10,5), padx=(3,5))
+    cravacao_entry = customtkinter.CTkEntry(tempo_inframe, placeholder_text="minutos", justify="center", height=30, width=275, font=("Helvetica", 14,"bold"), corner_radius=40, border_color="#565b5e", border_width=1, text_color="white", state="normal")
+    cravacao_entry.pack(pady=(5,10), padx=(3,5))
+
+
     destroyOR = customtkinter.CTkButton(windowOR, command=destroy_or, text="< Voltar", font=("Helvetica", 10, "italic"), width=80, height=30, fg_color="#242424", text_color="white", corner_radius=40)
+    entry_dataemissao.focus()
 
 def settings():
     settings = customtkinter.CTkToplevel(principal)
