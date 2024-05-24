@@ -357,6 +357,15 @@ def ORWindow():
             limpeza_entry.configure(placeholder_text="Minutos")
             cravacao_entry.configure(placeholder_text="Minutos")
 
+    def sliding_cotacao(value):
+        value = format(value, '.2f')
+        cotacao_entry.delete("0", 'end')
+        cotacao_entry.insert("0", value)
+    
+    def entry_cotacao(event):
+        cotacao = cotacao_entry.get()
+        cotacao_slider.set(float(cotacao))
+
     def destroy_or():
         principal.deiconify()
         windowOR.destroy()
@@ -397,7 +406,7 @@ def ORWindow():
     description_frame.place(anchor="nw", x=30, y=390)
     description_label= customtkinter.CTkButton(description_frame, text="Descrição do Orçamento",width=334, height=40, fg_color="#242424", border_color="#1f6aa5", border_width=1, corner_radius=40, font=("Berlin Sans FB Demi", 18), hover=False)
     description_label.place(y=35, x=187, anchor="center")
-    description_textbox = customtkinter.CTkTextbox(description_frame, width=334, height=160, corner_radius=20, fg_color="#242424", border_spacing=0)
+    description_textbox = customtkinter.CTkTextbox(description_frame, width=334, height=160, corner_radius=20, fg_color="#242424", border_spacing=0, border_color="#1f6aa5", border_width=1)
     description_textbox.place(x=187, y=152, anchor="center")
 
     hours_frame = customtkinter.CTkFrame(master=windowOR, width=375, height= 610, corner_radius=40)
@@ -458,41 +467,50 @@ def ORWindow():
     cotacao_frame.pack(pady=(10,5))
     cotacao = customtkinter.CTkLabel(cotacao_frame, width=260, text="Ouro:", font=("Helvetica", 14, "bold"))
     cotacao.pack(pady=5, padx=(11,0))
-
     ouro1k_label = customtkinter.CTkLabel(material_inframe, text="Ouro 1000:", font=("Helvetica",14,"bold"))
     ouro1k_label.pack(pady=(10,5), padx=(3,5))
     ouro1k_entry = customtkinter.CTkEntry(material_inframe, placeholder_text="g", justify="center", height=30, width=275, font=("Helvetica", 14,"bold"), corner_radius=40, border_color="#565b5e", border_width=1, text_color="white", state="normal")
     ouro1k_entry.pack(pady=(5,10), padx=(3,5))
-
     ouro750_label = customtkinter.CTkLabel(material_inframe, text="Ouro 750:", font=("Helvetica",14,"bold"))
     ouro750_label.pack(pady=(10,5), padx=(3,5))
     ouro750_entry = customtkinter.CTkEntry(material_inframe, placeholder_text="g", justify="center", height=30, width=275, font=("Helvetica", 14,"bold"), corner_radius=40, border_color="#565b5e", border_width=1, text_color="white", state="normal")
     ouro750_entry.pack(pady=(5,10), padx=(3,5))
-
     ourobranco_label = customtkinter.CTkLabel(material_inframe, text="Ouro Branco:", font=("Helvetica",14,"bold"))
     ourobranco_label.pack(pady=(10,5), padx=(3,5))
     ourobranco_entry = customtkinter.CTkEntry(material_inframe, placeholder_text="g", justify="center", height=30, width=275, font=("Helvetica", 14,"bold"), corner_radius=40, border_color="#565b5e", border_width=1, text_color="white", state="normal")
     ourobranco_entry.pack(pady=(5,10), padx=(3,5))
-
     prata_label = customtkinter.CTkLabel(material_inframe, text="Prata:", font=("Helvetica",14,"bold"))
     prata_label.pack(pady=(10,5), padx=(3,5))
     prata_entry = customtkinter.CTkEntry(material_inframe, placeholder_text="g", justify="center", height=30, width=275, font=("Helvetica", 14,"bold"), corner_radius=40, border_color="#565b5e", border_width=1, text_color="white", state="normal")
     prata_entry.pack(pady=(5,10), padx=(3,5))
-
     rodio_label = customtkinter.CTkLabel(material_inframe, text="Ródio:", font=("Helvetica",14,"bold"))
     rodio_label.pack(pady=(10,5), padx=(3,5))
-    rodio_entry = customtkinter.CTkEntry(material_inframe, placeholder_text="g", justify="center", height=30, width=275, font=("Helvetica", 14,"bold"), corner_radius=40, border_color="#565b5e", border_width=1, text_color="white", state="normal")
+    rodio_entry = customtkinter.CTkEntry(material_inframe, placeholder_text="R$", justify="center", height=30, width=275, font=("Helvetica", 14,"bold"), corner_radius=40, border_color="#565b5e", border_width=1, text_color="white", state="normal")
     rodio_entry.pack(pady=(5,10), padx=(3,5))
-
     pedras_label = customtkinter.CTkLabel(material_inframe, text="Pedras:", font=("Helvetica",14,"bold"))
     pedras_label.pack(pady=(10,5), padx=(3,5))
-    pedras_entry = customtkinter.CTkEntry(material_inframe, placeholder_text="g", justify="center", height=30, width=275, font=("Helvetica", 14,"bold"), corner_radius=40, border_color="#565b5e", border_width=1, text_color="white", state="normal")
+    pedras_entry = customtkinter.CTkEntry(material_inframe, placeholder_text="R$", justify="center", height=30, width=275, font=("Helvetica", 14,"bold"), corner_radius=40, border_color="#565b5e", border_width=1, text_color="white", state="normal")
     pedras_entry.pack(pady=(5,10), padx=(3,5))
-
     servicost_label = customtkinter.CTkLabel(material_inframe, text="Serviços de Terceiros:", font=("Helvetica",14,"bold"))
     servicost_label.pack(pady=(10,5), padx=(3,5))
-    servicost_entry = customtkinter.CTkEntry(material_inframe, placeholder_text="g", justify="center", height=30, width=275, font=("Helvetica", 14,"bold"), corner_radius=40, border_color="#565b5e", border_width=1, text_color="white", state="normal")
+    servicost_entry = customtkinter.CTkEntry(material_inframe, placeholder_text="R$", justify="center", height=30, width=275, font=("Helvetica", 14,"bold"), corner_radius=40, border_color="#565b5e", border_width=1, text_color="white", state="normal")
     servicost_entry.pack(pady=(5,10), padx=(3,5))
+
+    precos_frame = customtkinter.CTkFrame(master=windowOR, width=375, height= 200, corner_radius=40)
+    precos_frame.place(anchor="nw", x=800, y=440)
+    precos_label = customtkinter.CTkButton(precos_frame, text="Preçificação",width=334, height=40, fg_color="#242424", border_color="#1f6aa5", border_width=1, corner_radius=40, font=("Berlin Sans FB Demi", 18), hover=False)
+    precos_label.place(y=35, x=187, anchor="center")
+    precos_inframe = customtkinter.CTkFrame(master=precos_frame, fg_color="#242424", width=334, height=120, corner_radius=20,border_color="#1f6aa5", border_width=1)
+    precos_inframe.place(anchor="center", x=187, y=125)
+    cotacaometal_label = customtkinter.CTkLabel(precos_inframe, text="Cotação do Metal utilizado:", font=("Helvetica",14,"bold"))
+    cotacaometal_label.place(anchor="center", x=167, y=25)
+    cotacaopreco_frame = customtkinter.CTkFrame(master=precos_inframe, width=300, height= 50, fg_color="#1f6aa5", corner_radius=40)
+    cotacaopreco_frame.place(anchor="center", x=167, y=70)
+    cotacao_slider = customtkinter.CTkSlider(cotacaopreco_frame, command=sliding_cotacao,width=195, height=20, from_=0, to=410, number_of_steps=4100, button_color="#d5d9de", button_hover_color="white")
+    cotacao_slider.place(anchor="w", x=10,y=25)
+    cotacao_entry = customtkinter.CTkEntry(cotacaopreco_frame, placeholder_text="R$", justify="center", height=30, width=80, font=("Helvetica", 12,"bold"), corner_radius=40, border_color="#144870", border_width=1, text_color="white", state="normal")
+    cotacao_entry.place(anchor="w", x=210,y=25)
+    cotacao_entry.bind("<FocusOut>", entry_cotacao)
 
     destroyOR = customtkinter.CTkButton(windowOR, command=destroy_or, text="< Voltar", font=("Helvetica", 10, "italic"), width=80, height=30, fg_color="#242424", text_color="white", corner_radius=40)
     entry_dataemissao.focus()
