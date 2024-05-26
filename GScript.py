@@ -273,13 +273,20 @@ def ORWindow():
     global telefone_clientes  
     global cpf_clientes
 
+   # global orcamentos
+
     today = datetime.now()
     data_atual = today.strftime("%d/%m/%Y")
     validade = today+timedelta(7)
     data_validade = validade.strftime("%d/%m/%Y")
     
-    with open("clientes.csv", "r") as arquivo:
-        reader = csv.DictReader(arquivo)
+    #with open("orcamentos.csv", "r") as arquivo_orc:
+     #   reader_orc = csv.DictReader(arquivo_orc)
+     #   for row in reader_orc:
+     #       orcamentos.append(row)
+
+    with open("clientes.csv", "r") as arquivo_cli:
+        reader = csv.DictReader(arquivo_cli)
         for row in reader:
             clientes.append(row)
 
@@ -287,7 +294,22 @@ def ORWindow():
     telefone_clientes = [cliente['telefone'] for cliente in clientes]
     cpf_clientes = [cliente['cpf'] for cliente in clientes]
 
-    def search(event):
+    def salvar_orcamento():
+        data_emissao = entry_dataemissao.get()
+        data_validade = entry_datavalidade.get()
+        nome_cli = nome_cliente.get()
+        descricao = description_textbox.get()
+        prototipagem = entry_prototp.get()
+        desenho = entry_desenho.get()
+        molde = entry_molde.get()
+        fundicao = fundicao_entry.get()
+        montagem = montagem_entry.get()
+        acabamentos = acabamentos_entry.get()
+
+        orcamento = {"data_emissao": data_emissao, "data_validade": data_validade}
+
+
+    def search_cliente(event):
         value = event.widget.get()
         if value == '':
             nome_cliente['values'] = nomes_clientes
@@ -297,7 +319,6 @@ def ORWindow():
                 if value.lower() in item.lower():
                     filtro.append(item)
             nome_cliente.configure(values=filtro)
-
 
     def adicionar_cliente_cmd():
         global clientes
@@ -366,6 +387,15 @@ def ORWindow():
         cotacao = cotacao_entry.get()
         cotacao_slider.set(float(cotacao))
 
+    def sliding_hora(value):
+        value = format(value, '.2f')
+        precohora_entry.delete("0", 'end')
+        precohora_entry.insert("0", value)
+
+    def entry_hora(event):
+        cotacao = precohora_entry.get()
+        precohora_slider.set(float(cotacao))
+
     def destroy_or():
         principal.deiconify()
         windowOR.destroy()
@@ -391,7 +421,7 @@ def ORWindow():
     nome_cliente.place(y=35, x=187, anchor="center")
     nome_cliente.set("Nome do Cliente")
     nome_cliente.bind("<FocusIn>", lambda e: nome_cliente.set(""))
-    nome_cliente.bind("<KeyRelease>",search)
+    nome_cliente.bind("<KeyRelease>",search_cliente)
     labelTelefone = customtkinter.CTkLabel(h_frame, text="Telefone:", font=("Helvetica", 12))
     labelTelefone.place(y=80, x=100, anchor="center")
     entry_telefone = customtkinter.CTkEntry(h_frame, placeholder_text="(  )            -    ", height=30, width=150, font=("Helvetica", 14,"italic"), corner_radius=40, text_color="white", state="normal")
@@ -456,6 +486,18 @@ def ORWindow():
     cravacao_label.pack(pady=(10,5), padx=(3,5))
     cravacao_entry = customtkinter.CTkEntry(tempo_inframe, placeholder_text="minutos", justify="center", height=30, width=275, font=("Helvetica", 14,"bold"), corner_radius=40, border_color="#565b5e", border_width=1, text_color="white", state="normal")
     cravacao_entry.pack(pady=(5,10), padx=(3,5))
+    separator = customtkinter.CTkLabel(tempo_inframe, text="___________________________________________________", font=("Helvetica",8), text_color="#343638")
+    separator.pack(anchor="center", pady=(3,8), padx=(3,5))
+    precohora_label = customtkinter.CTkLabel(tempo_inframe, text="Preço da Hora Trabalhada:", font=("Helvetica",14,"bold"))
+    precohora_label.pack(anchor="center", pady=10, padx=(3,5))
+    precohora_frame = customtkinter.CTkFrame(master=tempo_inframe, width=300, height= 50, fg_color="#397445", corner_radius=40)
+    precohora_frame.pack(pady=(5,10), padx=(3,5))
+    precohora_slider = customtkinter.CTkSlider(precohora_frame, command=sliding_hora,width=182, height=20, from_=0, to=200, number_of_steps=2000, button_color="#d5d9de", button_hover_color="white")
+    precohora_slider.place(anchor="w", x=10,y=25)
+    precohora_entry = customtkinter.CTkEntry(precohora_frame, placeholder_text="R$", justify="center", height=30, width=80, font=("Helvetica", 12,"bold"), corner_radius=40, border_color="#2F5D39", border_width=1, text_color="white", state="normal")
+    precohora_entry.place(anchor="w", x=197,y=25)
+    precohora_entry.bind("<FocusOut>", entry_hora)
+
 
     material_frame = customtkinter.CTkFrame(master=windowOR, width=375, height= 400, corner_radius=40)
     material_frame.place(anchor="nw", x=800, y=30)
