@@ -272,18 +272,18 @@ def ORWindow():
     global nomes_clientes  
     global telefone_clientes  
     global cpf_clientes
-
-   # global orcamentos
+    global orcamentos
+    orcamentos = []
 
     today = datetime.now()
     data_atual = today.strftime("%d/%m/%Y")
     validade = today+timedelta(7)
     data_validade = validade.strftime("%d/%m/%Y")
-    
-    #with open("orcamentos.csv", "r") as arquivo_orc:
-     #   reader_orc = csv.DictReader(arquivo_orc)
-     #   for row in reader_orc:
-     #       orcamentos.append(row)
+
+    with open("orcamentos.csv", "r") as arquivo_orc:
+        reader_orc = csv.DictReader(arquivo_orc)
+        for row in reader_orc:
+            orcamentos.append(row)
 
     with open("clientes.csv", "r") as arquivo_cli:
         reader = csv.DictReader(arquivo_cli)
@@ -294,21 +294,100 @@ def ORWindow():
     telefone_clientes = [cliente['telefone'] for cliente in clientes]
     cpf_clientes = [cliente['cpf'] for cliente in clientes]
 
+    def novo_orcamento():
+        global n_orc
+        with open("config.txt", "r") as config:
+            linhas = config.read().splitlines()
+
+        n_orc = int(linhas[2])
+        n_orc += 1
+        linhas[2] = str(n_orc)
+
+        with open("config.txt", "w") as config:
+            for linha in linhas:
+                config.write(linha)
+                config.write('\n')
+        
+        #resetar campos
+
+    def exportar_orcamento():
+        global n_orc
+        with open("config.txt", "r") as config:
+            linhas = config.read().splitlines()
+
+        n_orc = int(linhas[2])
+
+        df = pd.read_csv("orcamentos.csv")
+        df.loc[n_orc, "soma_tempo"] = df.loc[n_orc,"prototipagem"] + df.loc[n_orc,"desenho"] + df.loc[n_orc,"molde"] + df.loc[n_orc,"fundicao"] + df.loc[n_orc,"montagem"] + df.loc[n_orc,"acabamentos"] + df.loc[n_orc,"polimento"] + df.loc[n_orc,"limpeza"] + df.loc[n_orc,"cravacao"]
+        if df.loc[n_orc,"time_format"] == "Minutos":
+            horas = (df.loc[n_orc,"soma_tempo"])/60
+
+
+        
     def salvar_orcamento():
+
+        global n_orc
+        with open("config.txt", "r") as config:
+            linhas = config.read().splitlines()
+
+        n_orc = int(linhas[2])
+
         data_emissao = entry_dataemissao.get()
         data_validade = entry_datavalidade.get()
         nome_cli = nome_cliente.get()
-        descricao = description_textbox.get()
+        descricao = description_textbox.get("1.0", "end")
+        time_format = tempo.get()
         prototipagem = entry_prototp.get()
         desenho = entry_desenho.get()
         molde = entry_molde.get()
         fundicao = fundicao_entry.get()
         montagem = montagem_entry.get()
         acabamentos = acabamentos_entry.get()
+        polimento = polimento_entry.get()
+        limpeza = limpeza_entry.get()
+        cravacao = cravacao_entry.get()
+        ouro1k = ouro1k_entry.get()
+        ouro750 =  ouro750_entry.get()
+        ouro_branco = ourobranco_entry.get()
+        pedras = pedras_entry.get()
+        prata = prata_entry.get()
+        rodio = rodio_entry.get()
+        servicos_terceiros = servicost_entry.get()
+        cotacao = cotacao_entry.get()
+        preco_hora = precohora_entry.get()
 
-        orcamento = {"data_emissao": data_emissao, "data_validade": data_validade}
+        orcamento = {"n_orc": n_orc,
+                    "data_emissao": data_emissao,
+                    "data_validade": data_validade,
+                    "nome_cli":nome_cli,
+                    "descricao":descricao,
+                    "time_format": time_format,
+                    "prototipagem":prototipagem,
+                    "desenho":desenho,
+                    "molde":molde,
+                    "fundicao":fundicao,
+                    "montagem":montagem,
+                    "acabamentos":acabamentos,
+                    "polimento":polimento,
+                    "limpeza":limpeza,
+                    "cravacao":cravacao,
+                    "ouro1k":ouro1k,
+                    "ouro750":ouro750,
+                    "ouro_branco":ouro_branco,
+                    "pedras":pedras,
+                    "prata":prata,
+                    "rodio":rodio,
+                    "servicos_terceiros":servicos_terceiros,
+                    "cotacao":cotacao,
+                    "preco_hora":preco_hora}
+        orcamentos.append(orcamento)
 
-
+        with open("orcamentos.csv", mode='w', newline='') as orc:
+            writer = csv.DictWriter(orc, fieldnames=["n_orc","data_emissao","data_validade","nome_cli","descricao","time_format","prototipagem","desenho","molde","fundicao","montagem","acabamentos","polimento","limpeza","cravacao","ouro1k","ouro750","ouro_branco","pedras","prata","rodio","servicos_terceiros","cotacao","preco_hora"])
+            writer.writeheader()
+            for orcamento in orcamentos:
+                writer.writerow(orcamento)
+        
     def search_cliente(event):
         value = event.widget.get()
         if value == '':
@@ -554,6 +633,9 @@ def ORWindow():
     cotacao_entry.place(anchor="w", x=210,y=25)
     cotacao_entry.bind("<FocusOut>", entry_cotacao)
 
+    save_btn = customtkinter.CTkButton(windowOR, text="Salvar", command=salvar_orcamento, font=("Berlin Sans FB Demi", 22))
+    save_btn.place(anchor="center", x=1100, y=490)
+
     destroyOR = customtkinter.CTkButton(windowOR, command=destroy_or, text="< Voltar", font=("Helvetica", 10, "italic"), width=80, height=30, fg_color="#242424", text_color="white", corner_radius=40)
     entry_dataemissao.focus()
 
@@ -579,7 +661,7 @@ def settings():
             config.write(linhas[1])
             config.write('\n')
             config.write(linhas[2])
-            savedirCR.configure(text=linhas[0])
+        savedirCR.configure(text=linhas[0])
 
     def fileselector_OR():
         linhas[1] = filedialog.askdirectory()
