@@ -311,16 +311,40 @@ def ORWindow():
         #resetar campos
 
     def exportar_orcamento():
-        global n_orc
-        with open("config.txt", "r") as config:
-            linhas = config.read().splitlines()
+        def dados_horas():
+            global n_orc
+            def adicionar_servico(df, df_horas, n_orc, servico):
+                if df.loc[n_orc, servico] != 0:
+                    df_horas.loc[len(df_horas),"Serviço"] = servico.capitalize()
+                    if df.loc[n_orc,"time_format"] == "Minutos":
+                        df_horas.loc[len(df_horas)-1,"Horas Trabalhadas"] = format((df.loc[n_orc,servico])/60, ".2f")
+                        df_horas.loc[len(df_horas)-1,"Valor"] = format(float((df_horas.loc[len(df_horas)-1,"Horas Trabalhadas"])*df.loc[n_orc,"preco_hora"]), ".2f")
+                    else:
+                        df_horas.loc[len(df_horas)-1,"Horas Trabalhadas"] = (df.loc[n_orc,servico])
+                        df_horas.loc[len(df_horas)-1,"Valor"] = format((df_horas.loc[len(df_horas)-1,"Horas Trabalhadas"])*df.loc[n_orc,"preco_hora"], ".2f")
 
-        n_orc = int(linhas[2])
+            with open(r"C:\Users\Gustavo Losch\Documents\Repositórios\Script-CIAF\config.txt", "r") as config:
+                linhas = config.read().splitlines()
+                n_orc = int(linhas[2])
 
-        df = pd.read_csv("orcamentos.csv")
-        df.loc[n_orc, "soma_tempo"] = df.loc[n_orc,"prototipagem"] + df.loc[n_orc,"desenho"] + df.loc[n_orc,"molde"] + df.loc[n_orc,"fundicao"] + df.loc[n_orc,"montagem"] + df.loc[n_orc,"acabamentos"] + df.loc[n_orc,"polimento"] + df.loc[n_orc,"limpeza"] + df.loc[n_orc,"cravacao"]
-        if df.loc[n_orc,"time_format"] == "Minutos":
-            horas = (df.loc[n_orc,"soma_tempo"])/60
+            df = pd.read_csv(r"C:\Users\Gustavo Losch\Documents\Repositórios\Script-CIAF\orcamentos.csv", encoding="ISO-8859-1")
+            df = df.fillna(0)
+
+            servicos = ["prototipagem", "desenho", "molde", "fundicao", "montagem", "acabamentos", "polimento", "limpeza", "cravacao"]
+
+            df_horas = pd.DataFrame(columns=["Serviço", "Horas Trabalhadas", "Valor"])
+
+            for servico in servicos:
+                adicionar_servico(df, df_horas, n_orc, servico)
+            
+            
+
+            table_data = [df_horas.columns.to_list()] + df_horas.values.tolist()
+            return table_data
+        
+
+        tabela_hora = dados_horas
+
 
 
         
@@ -633,8 +657,8 @@ def ORWindow():
     cotacao_entry.place(anchor="w", x=210,y=25)
     cotacao_entry.bind("<FocusOut>", entry_cotacao)
 
-    save_btn = customtkinter.CTkButton(windowOR, text="Salvar", command=salvar_orcamento, font=("Berlin Sans FB Demi", 22))
-    save_btn.place(anchor="center", x=1100, y=490)
+    save_btn = customtkinter.CTkButton(windowOR, text="Salvar",width=250, height=40, command=salvar_orcamento, font=("Berlin Sans FB Demi", 22), corner_radius=40)
+    save_btn.place(anchor="center", x=1100, y=680)
 
     destroyOR = customtkinter.CTkButton(windowOR, command=destroy_or, text="< Voltar", font=("Helvetica", 10, "italic"), width=80, height=30, fg_color="#242424", text_color="white", corner_radius=40)
     entry_dataemissao.focus()

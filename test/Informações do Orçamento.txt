@@ -10,29 +10,51 @@ Informações do Cliente:
 _________________________________________________
 Projeto
 -Descrição
+referencia os ciaf
 
 Horas gastas:
+-Prototipagem
 -Desenho
 -Molde em cera
 -Fundição
--Laminação
--Soldas
+-Montagem
 -Acabamentos
 -Polimento
 -Limpeza
 -Cravação de pedras
--Polimento final
 
 Material:
--Ouro 1000
+-Ouro 1000 (tirar)
 -Ouro 750
 -Ouro Branco
 -Pedras
 -Prata
--Borracha Silicone
 -Ródio
 -Serviços de Terceiros
 
 Preços:
 -Preço por hora trabalhada
 -Cotação do metal utilizado
+
+__________________________________________
+
+pesquisar orçamento
+novo orçamento
+Salvar orçamento
+Exportar orçamento (salva e exporta)
+Imprimir orçamento
+Enviar orçamento por Whatsapp
+
+____________
+Cpara Cliente
+
+qtd pedras 
+cts pedras
+k ouro
+peso
+tipo metal
+valor indiv.
+
+valor final
+
+
