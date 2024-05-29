@@ -274,6 +274,7 @@ def ORWindow():
     global cpf_clientes
     global orcamentos
     orcamentos = []
+    linhas = []
 
     today = datetime.now()
     data_atual = today.strftime("%d/%m/%Y")
@@ -294,21 +295,47 @@ def ORWindow():
     telefone_clientes = [cliente['telefone'] for cliente in clientes]
     cpf_clientes = [cliente['cpf'] for cliente in clientes]
 
+    with open("config.txt", "r") as config:
+        linhas = config.read().splitlines()
+        orcamento = linhas[2]
+
     def novo_orcamento():
         global n_orc
         with open("config.txt", "r") as config:
             linhas = config.read().splitlines()
 
-        n_orc = int(linhas[2])
-        n_orc += 1
-        linhas[2] = str(n_orc)
+        orcamento = int(linhas[2])
+        orcamento += 1
+        linhas[2] = str(orcamento)
 
         with open("config.txt", "w") as config:
             for linha in linhas:
                 config.write(linha)
                 config.write('\n')
+
+        n_or.configure(text=orcamento)
         
-        #resetar campos
+        nome_cliente.set("Nome do Cliente")
+        nome_cliente.bind("<FocusIn>", lambda e: nome_cliente.set(""))
+        entry_telefone.delete("0", "end")
+        entry_cpf.delete("0", "end")
+        description_textbox.delete("0.0", "end")
+        entry_prototp.delete("0", "end")
+        entry_desenho.delete("0", "end")
+        entry_molde.delete("0", "end")
+        fundicao_entry.delete("0", "end")
+        montagem_entry.delete("0", "end")
+        acabamentos_entry.delete("0", "end")
+        polimento_entry.delete("0", "end")
+        limpeza_entry.delete("0", "end")
+        cravacao_entry.delete("0", "end")
+        ouro1k_entry.delete("0", "end")
+        ouro750_entry.delete("0", "end")
+        ourobranco_entry.delete("0", "end")
+        prata_entry.delete("0", "end")
+        rodio_entry.delete("0", "end")
+        pedras_entry.delete("0", "end")
+        servicost_entry.delete("0", "end")
 
     def exportar_orcamento():
         def dados_horas():
@@ -344,13 +371,9 @@ def ORWindow():
         
 
         tabela_hora = dados_horas
-
-
-
         
     def salvar_orcamento():
 
-        global n_orc
         with open("config.txt", "r") as config:
             linhas = config.read().splitlines()
 
@@ -506,7 +529,8 @@ def ORWindow():
     top_frame = customtkinter.CTkFrame(master=windowOR, width=375, height=150, corner_radius=40)
     top_frame.place(y=30, x=30, anchor="nw")
     title_label = customtkinter.CTkButton(top_frame, text="Orçamento",width=200, height=50, fg_color="#242424", border_color="#1f6aa5", border_width=1, corner_radius=40, font=("Berlin Sans FB Demi", 22), hover=False).place(y=40, x=120, anchor="center")
-    n_or = customtkinter.CTkButton(top_frame, text="0001",width=80, height=50, corner_radius=40, fg_color="#1f6aa5",font=("Arial", 20, "bold"), hover=False).place(y=40, x=306, anchor="center")
+    n_or = customtkinter.CTkButton(top_frame, text=orcamento,width=80, height=50, corner_radius=40, fg_color="#1f6aa5",font=("Arial", 20, "bold"), hover=False)
+    n_or.place(y=40, x=306, anchor="center")
     labelemissao = customtkinter.CTkLabel(top_frame, text="Data da emissão:", font=("Helvetica", 12))
     labelemissao.place(y=90, x=100, anchor="center")
     entry_dataemissao = customtkinter.CTkEntry(top_frame,justify="center", placeholder_text="  /  /  ", height=30, width=150, font=("Helvetica", 14,"italic"), corner_radius=40, text_color="white", state="normal")
@@ -601,7 +625,6 @@ def ORWindow():
     precohora_entry.place(anchor="w", x=197,y=25)
     precohora_entry.bind("<FocusOut>", entry_hora)
 
-
     material_frame = customtkinter.CTkFrame(master=windowOR, width=375, height= 400, corner_radius=40)
     material_frame.place(anchor="nw", x=800, y=30)
     material_label = customtkinter.CTkButton(material_frame, text="Material Utilizado",width=334, height=40, fg_color="#242424", border_color="#70B8B8", border_width=1, corner_radius=40, font=("Berlin Sans FB Demi", 18), hover=False)
@@ -658,7 +681,9 @@ def ORWindow():
     cotacao_entry.bind("<FocusOut>", entry_cotacao)
 
     save_btn = customtkinter.CTkButton(windowOR, text="Salvar",width=250, height=40, command=salvar_orcamento, font=("Berlin Sans FB Demi", 22), corner_radius=40)
-    save_btn.place(anchor="center", x=1100, y=680)
+    save_btn.place(anchor="center", x=1050, y=680)
+    new_btn = customtkinter.CTkButton(windowOR, text="Novo",width=250, height=40, command=novo_orcamento, font=("Berlin Sans FB Demi", 22), corner_radius=40)
+    new_btn.place(anchor="center", x=790, y=680)
 
     destroyOR = customtkinter.CTkButton(windowOR, command=destroy_or, text="< Voltar", font=("Helvetica", 10, "italic"), width=80, height=30, fg_color="#242424", text_color="white", corner_radius=40)
     entry_dataemissao.focus()

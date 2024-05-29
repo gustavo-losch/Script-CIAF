@@ -36,6 +36,13 @@ Preços:
 -Preço por hora trabalhada
 -Cotação do metal utilizado
 
+-Lucro (%)
+
+-Subtotal
+-Frete
+-Desconto
+-Total
+
 __________________________________________
 
 pesquisar orçamento
