@@ -1,1 +1,43 @@
 https://www.realtimecolors.com/?colors=ffffff-242424-1f6aa5-397445-70b8b8&fonts=Inter-Inter
+
+Colocar seção de pedras
+Adicionar referencia a OS do ciaf
+
+"""
+        df_orc = pd.read_csv(r"C:\Users\Gustavo Losch\Documents\Repositórios\Script-CIAF\orcamentos.csv", encoding="ISO-8859-1")
+        df_orc = df_orc.fillna(0)
+        cliente = df_orc.loc[n_orc,"nome_cli"]
+        n_orc = orcamento.get()
+
+        file_name = "Orçamento "+str(n_orc)+" - "+cliente
+        doc = fitz.open(file_name)
+
+        zoom = 1
+        num_pages = 1
+        mat = fitz.Matrix(zoom, zoom)
+
+        canvas = customtkinter.CTkCanvas(pdf_tab)
+        canvas.pack(pady=10, padx=10)
+
+        def pdf_to_img(page_num):
+            page = doc.load_page(page_num)
+            pix = page.get_pixmap(matrix=mat)
+            return Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
+        
+        try:
+            page_num = 1
+            assert page_num >= 0 and page_num < num_pages
+            im = pdf_to_img(page_num)
+            img_tk = ImageTk.PhotoImage(im)
+            frame = Frame(canvas)
+            panel = customtkinter.CTkLabel(frame, image=img_tk)
+            panel.pack()
+            frame.image = img_tk
+            canvas.create_window(0, 0, anchor='nw', window=frame)
+            frame.update_idletasks()
+            canvas.config(scrollregion=canvas.bbox("all"))
+        except:
+            print("Erro ao carregar PDF")
+        
+        doc.close()
+        """

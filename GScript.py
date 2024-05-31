@@ -16,9 +16,12 @@ from reportlab.platypus import SimpleDocTemplate, Table, Paragraph, Spacer, Base
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib import colors
 from reportlab.lib.units import inch
-from PIL import Image
+from reportlab.graphics.shapes import Drawing, Line
+from PIL import Image, ImageTk
 import shutil
 import csv
+from CTkPDFViewer import *
+import pymupdf
 
 def CRWindow():
     windowCR = customtkinter.CTkToplevel(principal)
@@ -265,14 +268,16 @@ def ORWindow():
     windowOR = customtkinter.CTkToplevel(principal)
     principal.iconify()
     windowOR.title("Orçamento")
-    windowOR.geometry("1600x720")
-    windowOR.resizable(True,True)
+    windowOR.geometry("1725x720")
+    windowOR.resizable(False, False)
 
     global clientes
     global nomes_clientes  
     global telefone_clientes  
     global cpf_clientes
     global orcamentos
+    global exec
+    global pdf_frame
     orcamentos = []
     linhas = []
 
@@ -298,6 +303,31 @@ def ORWindow():
     with open("config.txt", "r") as config:
         linhas = config.read().splitlines()
         orcamento = linhas[2]
+
+    def tabview_pdf():
+        global exec 
+        linhas = []
+        with open("config.txt", "r") as config:
+            linhas = config.read().splitlines()
+            orcamento = linhas[2]
+
+        n_orc = int(orcamento)
+        df_orc = pd.read_csv(r"C:\Users\Gustavo Losch\Documents\Repositórios\Script-CIAF\orcamentos.csv", encoding="ISO-8859-1")
+        df_orc = df_orc.fillna(0)
+        cliente = df_orc.loc[n_orc,"nome_cli"]
+        file_name = r"C:\Users\Gustavo Losch\Documents\Repositórios\Script-CIAF\test\Orçamento "+str(n_orc)+" - "+cliente+".pdf"
+
+        if not exec:
+            global pdf_frame
+            exportar_orcamento
+
+            pdf_frame = CTkPDFViewer(pdf_tab, file=file_name, page_width=425, page_height=500)
+            pdf_frame.pack(fill="both", expand=True)
+            exec = True
+        else:
+            exportar_orcamento
+            pdf_frame.configure(file=file_name)
+            
 
     def novo_orcamento():
         global n_orc
@@ -338,39 +368,183 @@ def ORWindow():
         servicost_entry.delete("0", "end")
 
     def exportar_orcamento():
-        def dados_horas():
-            global n_orc
-            def adicionar_servico(df, df_horas, n_orc, servico):
-                if df.loc[n_orc, servico] != 0:
-                    df_horas.loc[len(df_horas),"Serviço"] = servico.capitalize()
-                    if df.loc[n_orc,"time_format"] == "Minutos":
-                        df_horas.loc[len(df_horas)-1,"Horas Trabalhadas"] = format((df.loc[n_orc,servico])/60, ".2f")
-                        df_horas.loc[len(df_horas)-1,"Valor"] = format(float((df_horas.loc[len(df_horas)-1,"Horas Trabalhadas"])*df.loc[n_orc,"preco_hora"]), ".2f")
-                    else:
-                        df_horas.loc[len(df_horas)-1,"Horas Trabalhadas"] = (df.loc[n_orc,servico])
-                        df_horas.loc[len(df_horas)-1,"Valor"] = format((df_horas.loc[len(df_horas)-1,"Horas Trabalhadas"])*df.loc[n_orc,"preco_hora"], ".2f")
+        def adicionar_servico(df_orc, df_horas, n_orc, servico):
+            if df_orc.loc[n_orc, servico] != 0:
+                df_horas.loc[len(df_horas),"Serviço"] = servico.capitalize()
+                if df_orc.loc[n_orc,"time_format"] == "Minutos":
+                    df_horas.loc[len(df_horas)-1,"Horas Trabalhadas"] = format((df_orc.loc[n_orc,servico])/60, ".2f")
+                    df_horas.loc[len(df_horas)-1,"Valor"] = format(float(df_horas.loc[len(df_horas)-1,"Horas Trabalhadas"])*df_orc.loc[n_orc,"preco_hora"], ".2f")
+                else:
+                    df_horas.loc[len(df_horas)-1,"Horas Trabalhadas"] = (df_orc.loc[n_orc,servico])
+                    df_horas.loc[len(df_horas)-1,"Valor"] = format((df_horas.loc[len(df_horas)-1,"Horas Trabalhadas"])*df_orc.loc[n_orc,"preco_hora"], ".2f")
 
-            with open(r"C:\Users\Gustavo Losch\Documents\Repositórios\Script-CIAF\config.txt", "r") as config:
-                linhas = config.read().splitlines()
-                n_orc = int(linhas[2])
+        with open(r"C:\Users\Gustavo Losch\Documents\Repositórios\Script-CIAF\config.txt", "r") as config:
+            linhas = config.read().splitlines()
+            n_orc = int(linhas[2])
 
-            df = pd.read_csv(r"C:\Users\Gustavo Losch\Documents\Repositórios\Script-CIAF\orcamentos.csv", encoding="ISO-8859-1")
-            df = df.fillna(0)
+        df_orc = pd.read_csv(r"C:\Users\Gustavo Losch\Documents\Repositórios\Script-CIAF\orcamentos.csv", encoding="ISO-8859-1")
+        df_orc = df_orc.fillna(0)
 
-            servicos = ["prototipagem", "desenho", "molde", "fundicao", "montagem", "acabamentos", "polimento", "limpeza", "cravacao"]
+        servicos = ["prototipagem", "desenho", "molde", "fundicao", "montagem", "acabamentos", "polimento", "limpeza", "cravacao"]
 
-            df_horas = pd.DataFrame(columns=["Serviço", "Horas Trabalhadas", "Valor"])
+        df_horas = pd.DataFrame(columns=["Serviço", "Horas Trabalhadas", "Valor"])
 
-            for servico in servicos:
-                adicionar_servico(df, df_horas, n_orc, servico)
-            
-            
+        for servico in servicos:
+            adicionar_servico(df_orc, df_horas, n_orc, servico)
 
-            table_data = [df_horas.columns.to_list()] + df_horas.values.tolist()
-            return table_data
-        
+        total = df_horas["Valor"].astype(float).sum()
+        total_horas = df_horas["Horas Trabalhadas"].replace('', '0').astype(float).sum()
+        df_horas.loc[len(df_horas)] = ['Total', format(total_horas, ".2f"), format(total, ".2f")]
 
-        tabela_hora = dados_horas
+        df_cli = pd.read_csv(r"C:\Users\Gustavo Losch\Documents\Repositórios\Script-CIAF\clientes.csv", encoding="ISO-8859-1")
+        df_cli = df_cli.fillna(0)
+
+        cliente = df_orc.loc[n_orc,"nome_cli"]
+        telefone = df_cli.loc[df_cli.index[df_cli["nome"]==cliente].tolist(), "telefone"].values[0]
+        cpf = df_cli.loc[df_cli.index[df_cli["nome"]==cliente].tolist(), "cpf"].values[0]
+
+        df_informacoes_cliente = pd.DataFrame({"Nome": [cliente], "Telefone": [telefone], "CPF/CNPJ": [cpf]})
+
+        def adicionar_material(df_orc, df_materiais, n_orc, material):
+            if df_orc.loc[n_orc, material] != 0:
+                df_materiais.loc[len(df_materiais),"Material"] = material.capitalize()
+
+                if material in ["pedras", "rodio", "servicos_terceiros"]:
+                    df_materiais.loc[len(df_materiais)-1,"Valor"] = format(df_orc.loc[n_orc, material], ".2f")
+                else:
+                    df_materiais.loc[len(df_materiais)-1,"Peso Utilizado"] = df_orc.loc[n_orc,material]
+                    df_materiais.loc[len(df_materiais)-1,"Valor"] = format(df_materiais.loc[len(df_materiais)-1,"Peso Utilizado"]*df_orc.loc[n_orc,"cotacao"], ".2f")
+
+        materiais = ["ouro1k", "ouro750", "ouro_branco", "prata", "pedras", "rodio", "servicos_terceiros"]
+
+        df_materiais = pd.DataFrame(columns=["Material", "Peso Utilizado", "Valor"])
+
+        for material in materiais:
+            adicionar_material(df_orc, df_materiais, n_orc, material)
+
+        total = df_materiais["Valor"].astype(float).sum()
+        df_materiais["Peso Utilizado"] = df_materiais["Peso Utilizado"].fillna("")
+        df_materiais.loc[len(df_materiais)] = ["Total", "", format(total, ".2f")]
+
+        df_informacoes_data = pd.DataFrame({"Data de Emissão": [df_orc.loc[n_orc,"data_emissao"]], "Data de Validade": [df_orc.loc[n_orc,"data_validade"]], "Validade": ["7 dias úteis"]})
+
+        valor_total = format(float(df_materiais.loc[len(df_materiais)-1, "Valor"]) + float(df_horas.loc[len(df_horas)-1, "Valor"]), ".2f")
+        df_valorfinal = pd.DataFrame({"Preços":["Subtotal", "Lucro:  "+"%", "Frete","Desconto", "Total"], "R$": [valor_total, "", "", "", valor_total]})
+
+        df_descricao = pd.DataFrame({"Descrição do Projeto": [df_orc.loc[n_orc,"descricao"]]})
+
+        # Criação do PDF com reportlab
+        styles = getSampleStyleSheet()
+
+        # Criação dos diferentes estilos utilizados nos documentos
+        title_style = ParagraphStyle(
+            'Title',
+            parent=styles['Title'],
+            fontSize=20,
+            textColor=colors.black,
+            alignment=1,  # 1 = TA_CENTER
+        )
+
+        subtitle_style = ParagraphStyle(
+            'Subtitle',
+            parent=styles['Normal'],
+            fontsize=10,
+            textColor=colors.black,
+            alignment=1,
+        )
+
+        footer_style = ParagraphStyle(
+            'Footer',
+            parent=styles['Normal'],
+            fontSize=10,
+            textColor=colors.grey,
+            alignment=2,  # 2 = TA_RIGHT
+        )
+
+        nametable_style = TableStyle([
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold')
+        ])
+
+        table_style = TableStyle([
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('BOX', (0, 0), (-1, -1), 1, colors.black),
+            ('GRID', (0, 0), (-1, -1), 0.25, colors.grey)
+        ])
+
+        table_style_final = TableStyle([
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('FONT', (-1, -1), (-1, -1), 'Helvetica-Bold', 12),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('BOX', (0, 0), (-1, -1), 1, colors.black),
+            ('GRID', (0, 0), (-1, -1), 0.25, colors.grey)
+        ])
+
+
+        def myFirstPage(canvas, doc):
+            canvas.saveState()
+            canvas.setFont('Helvetica', 8)
+            canvas.drawString(inch, 0.75 * inch, "OR-"+str(n_orc))
+            canvas.drawString(7*inch, 0.75 * inch, "RDA Design")
+            canvas.drawString(6.79*inch, 0.9 * inch, "_________________")
+            canvas.restoreState()
+
+        caminho = r"C:\Users\Gustavo Losch\Documents\Repositórios\Script-CIAF\test\Orçamento " + str(n_orc) + " - " + cliente + ".pdf"
+        doc = BaseDocTemplate(caminho, pagesize=letter)
+        frame = Frame(inch, inch, 6.5 * inch, 9.7 * inch, id='normal')
+        template = PageTemplate(id='test', frames=frame, onPage=myFirstPage)
+        doc.addPageTemplates([template])
+
+        title_text = "ORÇAMENTO Nº" + str(n_orc)
+        title = Paragraph(title_text, title_style)
+
+        linha = Drawing(2000, 10)  # Largura e altura da linha
+        line = Line(-42, 0, 497, 0, strokeColor=colors.black, strokeWidth=1)  # Coordenadas, cor e espessura
+        linha.add(line)
+
+        data_clientes = [df_informacoes_cliente.columns.to_list()] + df_informacoes_cliente.values.tolist()
+        tabela_clientes = Table(data_clientes)
+        tabela_clientes.setStyle(nametable_style)
+        tabela_clientes._argW[0] = 2.5 * inch
+        tabela_clientes._argW[1] = 2.5 * inch
+        tabela_clientes._argW[2] = 2.5 * inch
+
+        data_datas = [df_informacoes_data.columns.to_list()] + df_informacoes_data.values.tolist()
+        tabela_datas = Table(data_datas)
+        tabela_datas.setStyle(nametable_style)
+        tabela_datas._argW[0] = 2.5 * inch
+        tabela_datas._argW[1] = 2.5 * inch
+        tabela_datas._argW[2] = 2.5 * inch
+
+        data_descricao = [df_descricao.columns.to_list()] + df_descricao.values.tolist()
+        tabela_descricao = Table(data_descricao)
+        tabela_descricao.setStyle(table_style)
+        tabela_descricao._argW[0] = 7.5 * inch
+
+        data_servicos = [df_horas.columns.to_list()] + df_horas.values.tolist()
+        tabela_servicos = Table(data_servicos)
+        tabela_servicos.setStyle(table_style)
+        tabela_servicos._argW[0] = 2.5 * inch
+        tabela_servicos._argW[1] = 2.5 * inch
+        tabela_servicos._argW[2] = 2.5 * inch
+
+        data_materiais = [df_materiais.columns.to_list()] + df_materiais.values.tolist()
+        tabela_materiais = Table(data_materiais)
+        tabela_materiais.setStyle(table_style)
+        tabela_materiais._argW[0] = 2.5 * inch
+        tabela_materiais._argW[1] = 2.5 * inch
+        tabela_materiais._argW[2] = 2.5 * inch
+
+        data_final = [df_valorfinal.columns.to_list()] + df_valorfinal.values.tolist()
+        tabela_valorfinal = Table(data_final)
+        tabela_valorfinal.setStyle(table_style_final)
+        tabela_valorfinal._argW[0] = 5 * inch
+        tabela_valorfinal._argW[1] = 2.5 * inch
+
+        elements = [title, Spacer(1, 10), tabela_descricao, Spacer(1, 5), linha, tabela_clientes, tabela_datas, linha, Spacer(1, 15),
+                    tabela_servicos, Spacer(1, 20), tabela_materiais, Spacer(1, 20), tabela_valorfinal]
+        doc.build(elements)
         
     def salvar_orcamento():
 
@@ -680,10 +854,21 @@ def ORWindow():
     cotacao_entry.place(anchor="w", x=210,y=25)
     cotacao_entry.bind("<FocusOut>", entry_cotacao)
 
+    exec = False
+    tabs = customtkinter.CTkTabview(windowOR, width=500, height=625, corner_radius=40, command=tabview_pdf)
+    tabs.place(anchor="nw", x=1185, y=13)
+
+    precos_tab = tabs.add("Preços")
+    tabelas_tab = tabs.add("Tabelas")
+    pdf_tab = tabs.add("PDF")
+
+
     save_btn = customtkinter.CTkButton(windowOR, text="Salvar",width=250, height=40, command=salvar_orcamento, font=("Berlin Sans FB Demi", 22), corner_radius=40)
     save_btn.place(anchor="center", x=1050, y=680)
     new_btn = customtkinter.CTkButton(windowOR, text="Novo",width=250, height=40, command=novo_orcamento, font=("Berlin Sans FB Demi", 22), corner_radius=40)
     new_btn.place(anchor="center", x=790, y=680)
+    new_btn = customtkinter.CTkButton(windowOR, text="Exportar",width=250, height=40, command=exportar_orcamento, font=("Berlin Sans FB Demi", 22), corner_radius=40)
+    new_btn.place(anchor="center", x=530, y=680)
 
     destroyOR = customtkinter.CTkButton(windowOR, command=destroy_or, text="< Voltar", font=("Helvetica", 10, "italic"), width=80, height=30, fg_color="#242424", text_color="white", corner_radius=40)
     entry_dataemissao.focus()

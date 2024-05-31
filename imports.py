@@ -15,6 +15,9 @@ from reportlab.platypus import SimpleDocTemplate, Table, Paragraph, Spacer, Base
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib import colors
 from reportlab.lib.units import inch
-from PIL import Image
+from reportlab.graphics.shapes import Drawing, Line
+from PIL import Image, ImageTk
 import shutil
 import csv
+import tkPDFViewer
+import pymupdf

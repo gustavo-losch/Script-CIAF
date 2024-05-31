@@ -10,7 +10,7 @@ Informações do Cliente:
 _________________________________________________
 Projeto
 -Descrição
-referencia os ciaf
+-Referencia os ciaf (Colocar)
 
 Horas gastas:
 -Prototipagem
@@ -27,16 +27,23 @@ Material:
 -Ouro 1000 (tirar)
 -Ouro 750
 -Ouro Branco
--Pedras
+-Pedras (tirar)
 -Prata
 -Ródio
 -Serviços de Terceiros
+
+Pedras: 
+-Nome da Pedra
+-Quantidade
+-Pontos
+-Quilatagem
+Preço (por pedra / total)
 
 Preços:
 -Preço por hora trabalhada
 -Cotação do metal utilizado
 
--Lucro (%)
+-Lucro (%) - Sobre a mão de obra apenas.
 
 -Subtotal
 -Frete
