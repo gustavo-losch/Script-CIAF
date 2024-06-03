@@ -327,7 +327,6 @@ def ORWindow():
         else:
             exportar_orcamento
             pdf_frame.configure(file=file_name)
-            
 
     def novo_orcamento():
         global n_orc
@@ -368,6 +367,9 @@ def ORWindow():
         servicost_entry.delete("0", "end")
 
     def exportar_orcamento():
+
+        global valor_total
+
         def adicionar_servico(df_orc, df_horas, n_orc, servico):
             if df_orc.loc[n_orc, servico] != 0:
                 df_horas.loc[len(df_horas),"Serviço"] = servico.capitalize()
@@ -691,10 +693,20 @@ def ORWindow():
         value = format(value, '.2f')
         precohora_entry.delete("0", 'end')
         precohora_entry.insert("0", value)
-
+        
     def entry_hora(event):
         cotacao = precohora_entry.get()
         precohora_slider.set(float(cotacao))
+    
+    def sliding_lucro(value):
+
+        value = format(value, '.2f')
+        lucro_entry.delete("0", 'end')
+        lucro_entry.insert("0", value)
+
+    def entry_lucro(event):
+        cotacao = lucro_entry.get()
+        lucro_slider.set(float(cotacao))
 
     def destroy_or():
         principal.deiconify()
@@ -862,6 +874,30 @@ def ORWindow():
     tabelas_tab = tabs.add("Tabelas")
     pdf_tab = tabs.add("PDF")
 
+    precos1_label = customtkinter.CTkButton(precos_tab, text="Preçificação",width=410, height=40, fg_color="#242424", border_color="#1f6aa5", border_width=1, corner_radius=40, font=("Berlin Sans FB Demi", 18), hover=False)
+    precos1_label.place(anchor="nw", x=10, y=10)
+    precostab_frame = customtkinter.CTkFrame(master=precos_tab, width=408, height=440, fg_color="#242424", corner_radius=20, border_color="#1f6aa5", border_width=1)
+    precostab_frame.place(anchor="nw", x=10, y=60)
+    cotacaometal_label = customtkinter.CTkLabel(precostab_frame, text="Lucro - Sobre a mão de obra.", font=("Helvetica",14,"bold"))
+    cotacaometal_label.place(anchor="center", x=207, y=20)
+    lucro_frame = customtkinter.CTkFrame(master=precostab_frame, width=300, height= 50, fg_color="#1f6aa5", corner_radius=40)
+    lucro_frame.place(anchor="center", x=207, y=65)
+    lucro_slider = customtkinter.CTkSlider(lucro_frame, command=sliding_lucro,width=195, height=20, from_=0, to=100, number_of_steps=200, button_color="#d5d9de", button_hover_color="white")
+    lucro_slider.place(anchor="w", x=10,y=25)
+    lucro_slider.set(12)
+    lucro_entry = customtkinter.CTkEntry(lucro_frame, placeholder_text="%", justify="center", height=30, width=80, font=("Helvetica", 12,"bold"), corner_radius=40, border_color="#144870", border_width=1, text_color="white", state="normal")
+    lucro_entry.place(anchor="w", x=210,y=25)
+    lucro_entry.bind("<FocusOut>", entry_lucro)
+    labelfrete = customtkinter.CTkLabel(precostab_frame, text="Frete", font=("Helvetica", 14, "bold"))
+    labelfrete.place(y=120, x=130, anchor="center")
+    entry_frete = customtkinter.CTkEntry(precostab_frame,justify="center", placeholder_text="R$", height=30, width=140, font=("Helvetica", 14,"italic"), corner_radius=40, text_color="white", state="normal")
+    entry_frete.place(y=135, x=60, anchor="nw")
+    labeldesconto = customtkinter.CTkLabel(precostab_frame, text="Desconto", font=("Helvetica", 14, "bold"))
+    labeldesconto.place(y=120, x=285, anchor="center")
+    entry_desconto = customtkinter.CTkEntry(precostab_frame,justify="center", placeholder_text="R$", height=30, width=140, font=("Helvetica", 14,"italic"), corner_radius=40, text_color="white", state="normal")
+    entry_desconto.place(y=135, x=215, anchor="nw")
+    valortotal_label = customtkinter.CTkButton(precos_tab, text="",width=410, height=40, fg_color="#242424", border_color="#1f6aa5", border_width=1, corner_radius=40, font=("Berlin Sans FB Demi", 18), hover=False)
+    valortotal_label.place(anchor="center", x=207, y=165)
 
     save_btn = customtkinter.CTkButton(windowOR, text="Salvar",width=250, height=40, command=salvar_orcamento, font=("Berlin Sans FB Demi", 22), corner_radius=40)
     save_btn.place(anchor="center", x=1050, y=680)
@@ -870,7 +906,8 @@ def ORWindow():
     new_btn = customtkinter.CTkButton(windowOR, text="Exportar",width=250, height=40, command=exportar_orcamento, font=("Berlin Sans FB Demi", 22), corner_radius=40)
     new_btn.place(anchor="center", x=530, y=680)
 
-    destroyOR = customtkinter.CTkButton(windowOR, command=destroy_or, text="< Voltar", font=("Helvetica", 10, "italic"), width=80, height=30, fg_color="#242424", text_color="white", corner_radius=40)
+    destroyOR = customtkinter.CTkButton(windowOR, command=destroy_or, text="Voltar", width=250, height=40, fg_color="#242424", border_color="#1f6aa5", border_width=1, corner_radius=40, font=("Berlin Sans FB Demi", 20))
+    destroyOR.place(anchor="center", x=1580, y=680)
     entry_dataemissao.focus()
 
 def settings():
