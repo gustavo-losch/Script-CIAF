@@ -278,6 +278,7 @@ def ORWindow():
     global orcamentos
     global exec
     global pdf_frame
+    global orcamento_atual
     orcamentos = []
     linhas = []
 
@@ -303,29 +304,27 @@ def ORWindow():
     with open("config.txt", "r") as config:
         linhas = config.read().splitlines()
         orcamento = linhas[2]
+        orcamento_atual = int(linhas[2])
 
     def tabview_pdf():
-        global exec 
-        linhas = []
-        with open("config.txt", "r") as config:
-            linhas = config.read().splitlines()
-            orcamento = linhas[2]
+        global exec
+        global orcamento_atual
 
-        n_orc = int(orcamento)
-        df_orc = pd.read_csv(r"C:\Users\Gustavo Losch\Documents\Repositórios\Script-CIAF\orcamentos.csv", encoding="ISO-8859-1")
+        n_orc = int(orcamento_atual)
+        df_orc = pd.read_csv("orcamentos.csv", encoding="ISO-8859-1")
         df_orc = df_orc.fillna(0)
         cliente = df_orc.loc[n_orc,"nome_cli"]
-        file_name = r"C:\Users\Gustavo Losch\Documents\Repositórios\Script-CIAF\test\Orçamento "+str(n_orc)+" - "+cliente+".pdf"
+        file_name = "test/Orçamento "+str(n_orc)+" - "+cliente+".pdf"
 
         if not exec:
             global pdf_frame
-            exportar_orcamento
+            exportar_orcamento()
 
             pdf_frame = CTkPDFViewer(pdf_tab, file=file_name, page_width=425, page_height=500)
             pdf_frame.pack(fill="both", expand=True)
             exec = True
         else:
-            exportar_orcamento
+            exportar_orcamento()
             pdf_frame.configure(file=file_name)
 
     def novo_orcamento():
@@ -369,16 +368,17 @@ def ORWindow():
     def exportar_orcamento():
 
         global valor_total
+        global orcamento_atual
 
-        def adicionar_servico(df_orc, df_horas, n_orc, servico):
-            if df_orc.loc[n_orc, servico] != 0:
+        def adicionar_servico(df_orc, df_horas, orcamento_atual, servico):
+            if df_orc.loc[orcamento_atual, servico] != 0:
                 df_horas.loc[len(df_horas),"Serviço"] = servico.capitalize()
-                if df_orc.loc[n_orc,"time_format"] == "Minutos":
-                    df_horas.loc[len(df_horas)-1,"Horas Trabalhadas"] = format((df_orc.loc[n_orc,servico])/60, ".2f")
-                    df_horas.loc[len(df_horas)-1,"Valor"] = format(float(df_horas.loc[len(df_horas)-1,"Horas Trabalhadas"])*df_orc.loc[n_orc,"preco_hora"], ".2f")
+                if df_orc.loc[orcamento_atual,"time_format"] == "Minutos":
+                    df_horas.loc[len(df_horas)-1,"Horas Trabalhadas"] = format((df_orc.loc[orcamento_atual,servico])/60, ".2f")
+                    df_horas.loc[len(df_horas)-1,"Valor"] = format(float(df_horas.loc[len(df_horas)-1,"Horas Trabalhadas"])*df_orc.loc[orcamento_atual,"preco_hora"], ".2f")
                 else:
-                    df_horas.loc[len(df_horas)-1,"Horas Trabalhadas"] = (df_orc.loc[n_orc,servico])
-                    df_horas.loc[len(df_horas)-1,"Valor"] = format((df_horas.loc[len(df_horas)-1,"Horas Trabalhadas"])*df_orc.loc[n_orc,"preco_hora"], ".2f")
+                    df_horas.loc[len(df_horas)-1,"Horas Trabalhadas"] = (df_orc.loc[orcamento_atual,servico])
+                    df_horas.loc[len(df_horas)-1,"Valor"] = format((df_horas.loc[len(df_horas)-1,"Horas Trabalhadas"])*df_orc.loc[orcamento_atual,"preco_hora"], ".2f")
 
         with open(r"C:\Users\Gustavo Losch\Documents\Repositórios\Script-CIAF\config.txt", "r") as config:
             linhas = config.read().splitlines()
@@ -392,7 +392,7 @@ def ORWindow():
         df_horas = pd.DataFrame(columns=["Serviço", "Horas Trabalhadas", "Valor"])
 
         for servico in servicos:
-            adicionar_servico(df_orc, df_horas, n_orc, servico)
+            adicionar_servico(df_orc, df_horas, orcamento_atual, servico)
 
         total = df_horas["Valor"].astype(float).sum()
         total_horas = df_horas["Horas Trabalhadas"].replace('', '0').astype(float).sum()
@@ -401,39 +401,39 @@ def ORWindow():
         df_cli = pd.read_csv(r"C:\Users\Gustavo Losch\Documents\Repositórios\Script-CIAF\clientes.csv", encoding="ISO-8859-1")
         df_cli = df_cli.fillna(0)
 
-        cliente = df_orc.loc[n_orc,"nome_cli"]
+        cliente = df_orc.loc[orcamento_atual,"nome_cli"]
         telefone = df_cli.loc[df_cli.index[df_cli["nome"]==cliente].tolist(), "telefone"].values[0]
         cpf = df_cli.loc[df_cli.index[df_cli["nome"]==cliente].tolist(), "cpf"].values[0]
 
         df_informacoes_cliente = pd.DataFrame({"Nome": [cliente], "Telefone": [telefone], "CPF/CNPJ": [cpf]})
 
-        def adicionar_material(df_orc, df_materiais, n_orc, material):
-            if df_orc.loc[n_orc, material] != 0:
+        def adicionar_material(df_orc, df_materiais, orcamento_atual, material):
+            if df_orc.loc[orcamento_atual, material] != 0:
                 df_materiais.loc[len(df_materiais),"Material"] = material.capitalize()
 
                 if material in ["pedras", "rodio", "servicos_terceiros"]:
-                    df_materiais.loc[len(df_materiais)-1,"Valor"] = format(df_orc.loc[n_orc, material], ".2f")
+                    df_materiais.loc[len(df_materiais)-1,"Valor"] = format(df_orc.loc[orcamento_atual, material], ".2f")
                 else:
-                    df_materiais.loc[len(df_materiais)-1,"Peso Utilizado"] = df_orc.loc[n_orc,material]
-                    df_materiais.loc[len(df_materiais)-1,"Valor"] = format(df_materiais.loc[len(df_materiais)-1,"Peso Utilizado"]*df_orc.loc[n_orc,"cotacao"], ".2f")
+                    df_materiais.loc[len(df_materiais)-1,"Peso Utilizado"] = df_orc.loc[orcamento_atual,material]
+                    df_materiais.loc[len(df_materiais)-1,"Valor"] = format(df_materiais.loc[len(df_materiais)-1,"Peso Utilizado"]*df_orc.loc[orcamento_atual,"cotacao"], ".2f")
 
         materiais = ["ouro1k", "ouro750", "ouro_branco", "prata", "pedras", "rodio", "servicos_terceiros"]
 
         df_materiais = pd.DataFrame(columns=["Material", "Peso Utilizado", "Valor"])
 
         for material in materiais:
-            adicionar_material(df_orc, df_materiais, n_orc, material)
+            adicionar_material(df_orc, df_materiais, orcamento_atual, material)
 
         total = df_materiais["Valor"].astype(float).sum()
         df_materiais["Peso Utilizado"] = df_materiais["Peso Utilizado"].fillna("")
         df_materiais.loc[len(df_materiais)] = ["Total", "", format(total, ".2f")]
 
-        df_informacoes_data = pd.DataFrame({"Data de Emissão": [df_orc.loc[n_orc,"data_emissao"]], "Data de Validade": [df_orc.loc[n_orc,"data_validade"]], "Validade": ["7 dias úteis"]})
+        df_informacoes_data = pd.DataFrame({"Data de Emissão": [df_orc.loc[orcamento_atual,"data_emissao"]], "Data de Validade": [df_orc.loc[orcamento_atual,"data_validade"]], "Validade": ["7 dias úteis"]})
 
         valor_total = format(float(df_materiais.loc[len(df_materiais)-1, "Valor"]) + float(df_horas.loc[len(df_horas)-1, "Valor"]), ".2f")
         df_valorfinal = pd.DataFrame({"Preços":["Subtotal", "Lucro:  "+"%", "Frete","Desconto", "Total"], "R$": [valor_total, "", "", "", valor_total]})
 
-        df_descricao = pd.DataFrame({"Descrição do Projeto": [df_orc.loc[n_orc,"descricao"]]})
+        df_descricao = pd.DataFrame({"Descrição do Projeto": [df_orc.loc[orcamento_atual,"descricao"]]})
 
         # Criação do PDF com reportlab
         styles = getSampleStyleSheet()
@@ -487,18 +487,18 @@ def ORWindow():
         def myFirstPage(canvas, doc):
             canvas.saveState()
             canvas.setFont('Helvetica', 8)
-            canvas.drawString(inch, 0.75 * inch, "OR-"+str(n_orc))
+            canvas.drawString(inch, 0.75 * inch, "OR-"+str(orcamento_atual))
             canvas.drawString(7*inch, 0.75 * inch, "RDA Design")
             canvas.drawString(6.79*inch, 0.9 * inch, "_________________")
             canvas.restoreState()
 
-        caminho = r"C:\Users\Gustavo Losch\Documents\Repositórios\Script-CIAF\test\Orçamento " + str(n_orc) + " - " + cliente + ".pdf"
+        caminho = r"C:\Users\Gustavo Losch\Documents\Repositórios\Script-CIAF\test\Orçamento " + str(orcamento_atual) + " - " + cliente + ".pdf"
         doc = BaseDocTemplate(caminho, pagesize=letter)
         frame = Frame(inch, inch, 6.5 * inch, 9.7 * inch, id='normal')
         template = PageTemplate(id='test', frames=frame, onPage=myFirstPage)
         doc.addPageTemplates([template])
 
-        title_text = "ORÇAMENTO Nº" + str(n_orc)
+        title_text = "ORÇAMENTO Nº" + str(orcamento_atual)
         title = Paragraph(title_text, title_style)
 
         linha = Drawing(2000, 10)  # Largura e altura da linha
@@ -549,67 +549,77 @@ def ORWindow():
         doc.build(elements)
         
     def salvar_orcamento():
+        try:
+            with open("config.txt", "r") as config:
+                linhas = config.read().splitlines()
 
-        with open("config.txt", "r") as config:
-            linhas = config.read().splitlines()
+            if orcamento_atual < len(orcamentos):
+                n_orc = orcamento_atual
+            else:
+                n_orc = int(linhas[2])
 
-        n_orc = int(linhas[2])
+            data_emissao = entry_dataemissao.get()
+            data_validade = entry_datavalidade.get()
+            nome_cli = nome_cliente.get()
+            descricao = description_textbox.get("1.0", "end")
+            time_format = tempo.get()
+            prototipagem = entry_prototp.get()
+            desenho = entry_desenho.get()
+            molde = entry_molde.get()
+            fundicao = fundicao_entry.get()
+            montagem = montagem_entry.get()
+            acabamentos = acabamentos_entry.get()
+            polimento = polimento_entry.get()
+            limpeza = limpeza_entry.get()
+            cravacao = cravacao_entry.get()
+            ouro1k = ouro1k_entry.get()
+            ouro750 =  ouro750_entry.get()
+            ouro_branco = ourobranco_entry.get()
+            pedras = pedras_entry.get()
+            prata = prata_entry.get()
+            rodio = rodio_entry.get()
+            servicos_terceiros = servicost_entry.get()
+            cotacao = cotacao_entry.get()
+            preco_hora = precohora_entry.get()
 
-        data_emissao = entry_dataemissao.get()
-        data_validade = entry_datavalidade.get()
-        nome_cli = nome_cliente.get()
-        descricao = description_textbox.get("1.0", "end")
-        time_format = tempo.get()
-        prototipagem = entry_prototp.get()
-        desenho = entry_desenho.get()
-        molde = entry_molde.get()
-        fundicao = fundicao_entry.get()
-        montagem = montagem_entry.get()
-        acabamentos = acabamentos_entry.get()
-        polimento = polimento_entry.get()
-        limpeza = limpeza_entry.get()
-        cravacao = cravacao_entry.get()
-        ouro1k = ouro1k_entry.get()
-        ouro750 =  ouro750_entry.get()
-        ouro_branco = ourobranco_entry.get()
-        pedras = pedras_entry.get()
-        prata = prata_entry.get()
-        rodio = rodio_entry.get()
-        servicos_terceiros = servicost_entry.get()
-        cotacao = cotacao_entry.get()
-        preco_hora = precohora_entry.get()
+            orcamento = {"n_orc": n_orc,
+                        "data_emissao": data_emissao,
+                        "data_validade": data_validade,
+                        "nome_cli":nome_cli,
+                        "descricao":descricao,
+                        "time_format": time_format,
+                        "prototipagem":prototipagem,
+                        "desenho":desenho,
+                        "molde":molde,
+                        "fundicao":fundicao,
+                        "montagem":montagem,
+                        "acabamentos":acabamentos,
+                        "polimento":polimento,
+                        "limpeza":limpeza,
+                        "cravacao":cravacao,
+                        "ouro1k":ouro1k,
+                        "ouro750":ouro750,
+                        "ouro_branco":ouro_branco,
+                        "pedras":pedras,
+                        "prata":prata,
+                        "rodio":rodio,
+                        "servicos_terceiros":servicos_terceiros,
+                        "cotacao":cotacao,
+                        "preco_hora":preco_hora}
+            
+            if orcamento_atual < len(orcamentos):
+                orcamentos[orcamento_atual] = orcamento
+            else:
+                orcamentos.append(orcamento)
 
-        orcamento = {"n_orc": n_orc,
-                    "data_emissao": data_emissao,
-                    "data_validade": data_validade,
-                    "nome_cli":nome_cli,
-                    "descricao":descricao,
-                    "time_format": time_format,
-                    "prototipagem":prototipagem,
-                    "desenho":desenho,
-                    "molde":molde,
-                    "fundicao":fundicao,
-                    "montagem":montagem,
-                    "acabamentos":acabamentos,
-                    "polimento":polimento,
-                    "limpeza":limpeza,
-                    "cravacao":cravacao,
-                    "ouro1k":ouro1k,
-                    "ouro750":ouro750,
-                    "ouro_branco":ouro_branco,
-                    "pedras":pedras,
-                    "prata":prata,
-                    "rodio":rodio,
-                    "servicos_terceiros":servicos_terceiros,
-                    "cotacao":cotacao,
-                    "preco_hora":preco_hora}
-        orcamentos.append(orcamento)
-
-        with open("orcamentos.csv", mode='w', newline='') as orc:
-            writer = csv.DictWriter(orc, fieldnames=["n_orc","data_emissao","data_validade","nome_cli","descricao","time_format","prototipagem","desenho","molde","fundicao","montagem","acabamentos","polimento","limpeza","cravacao","ouro1k","ouro750","ouro_branco","pedras","prata","rodio","servicos_terceiros","cotacao","preco_hora"])
-            writer.writeheader()
-            for orcamento in orcamentos:
-                writer.writerow(orcamento)
+            with open("orcamentos.csv", mode='w', newline='') as orc:
+                writer = csv.DictWriter(orc, fieldnames=["n_orc","data_emissao","data_validade","nome_cli","descricao","time_format","prototipagem","desenho","molde","fundicao","montagem","acabamentos","polimento","limpeza","cravacao","ouro1k","ouro750","ouro_branco","pedras","prata","rodio","servicos_terceiros","cotacao","preco_hora"])
+                writer.writeheader()
+                for orcamento in orcamentos:
+                    writer.writerow(orcamento)
+            print("Orçamento Salvo")
+        except Exception as e:
+            print("Erro em Salvamento")
         
     def search_cliente(event):
         value = event.widget.get()
@@ -698,7 +708,7 @@ def ORWindow():
         cotacao = precohora_entry.get()
         precohora_slider.set(float(cotacao))
     
-    def sliding_lucro(value):
+    def sliding_lucro(value): #revisar
 
         value = format(value, '.2f')
         lucro_entry.delete("0", 'end')
@@ -707,6 +717,63 @@ def ORWindow():
     def entry_lucro(event):
         cotacao = lucro_entry.get()
         lucro_slider.set(float(cotacao))
+
+    def search():
+        global orcamento_atual
+        searching = search_entry.get()
+        orcamento_atual = int(searching)
+
+        entry_dataemissao.delete(0,'end')
+        entry_dataemissao.insert(0, (orcamentos[orcamento_atual]['data_emissao']))
+        entry_datavalidade.delete(0,'end')
+        entry_datavalidade.insert(0, (orcamentos[orcamento_atual]['data_validade']))
+        nome_cliente.set(orcamentos[orcamento_atual]['nome_cli'])
+        preencher_campos(orcamentos[orcamento_atual]['nome_cli'])
+        description_textbox.delete('0.0','end')
+        description_textbox.insert('0.0', (orcamentos[orcamento_atual]['descricao']))
+        if (orcamentos[orcamento_atual]['time_format']) == "Minutos":
+            tempo.deselect()
+        else:
+            tempo.select()
+        entry_prototp.delete(0,'end')
+        entry_prototp.insert(0, (orcamentos[orcamento_atual]['prototipagem']))
+        entry_desenho.delete(0,'end')
+        entry_desenho.insert(0, (orcamentos[orcamento_atual]['desenho']))
+        entry_molde.delete(0,'end')
+        entry_molde.insert(0, (orcamentos[orcamento_atual]['molde']))
+        fundicao_entry.delete(0,'end')
+        fundicao_entry.insert(0, (orcamentos[orcamento_atual]['fundicao']))
+        montagem_entry.delete(0,'end')
+        montagem_entry.insert(0, (orcamentos[orcamento_atual]['montagem']))
+        acabamentos_entry.delete(0,'end')
+        acabamentos_entry.insert(0, (orcamentos[orcamento_atual]['acabamentos']))
+        polimento_entry.delete(0,'end')
+        polimento_entry.insert(0, (orcamentos[orcamento_atual]['polimento']))
+        limpeza_entry.delete(0,'end')
+        limpeza_entry.insert(0, (orcamentos[orcamento_atual]['limpeza']))
+        cravacao_entry.delete(0,'end')
+        cravacao_entry.insert(0, (orcamentos[orcamento_atual]['cravacao']))
+        ouro1k_entry.delete(0,'end')
+        ouro1k_entry.insert(0, (orcamentos[orcamento_atual]['ouro1k']))
+        ouro750_entry.delete(0,'end')
+        ouro750_entry.insert(0, (orcamentos[orcamento_atual]['ouro750']))
+        ourobranco_entry.delete(0,'end')
+        ourobranco_entry.insert(0, (orcamentos[orcamento_atual]['ouro_branco']))
+        pedras_entry.delete(0,'end')
+        pedras_entry.insert(0, (orcamentos[orcamento_atual]['pedras']))
+        prata_entry.delete(0,'end')
+        prata_entry.insert(0, (orcamentos[orcamento_atual]['prata']))
+        rodio_entry.delete(0,'end')
+        rodio_entry.insert(0, (orcamentos[orcamento_atual]['rodio']))
+        servicost_entry.delete(0,'end')
+        servicost_entry.insert(0, (orcamentos[orcamento_atual]['servicos_terceiros']))
+        cotacao_entry.delete(0,'end')
+        cotacao_entry.insert(0, (orcamentos[orcamento_atual]['cotacao']))
+        precohora_entry.delete(0,'end')
+        precohora_entry.insert(0, (orcamentos[orcamento_atual]['preco_hora']))
+        n_or.configure(text=orcamento_atual)
+
+        print("Busca realizada com sucesso")
 
     def destroy_or():
         principal.deiconify()
@@ -871,7 +938,7 @@ def ORWindow():
     tabs.place(anchor="nw", x=1185, y=13)
 
     precos_tab = tabs.add("Preços")
-    tabelas_tab = tabs.add("Tabelas")
+    #tabelas_tab = tabs.add("Tabelas")
     pdf_tab = tabs.add("PDF")
 
     precos1_label = customtkinter.CTkButton(precos_tab, text="Preçificação",width=410, height=40, fg_color="#242424", border_color="#1f6aa5", border_width=1, corner_radius=40, font=("Berlin Sans FB Demi", 18), hover=False)
@@ -896,18 +963,35 @@ def ORWindow():
     labeldesconto.place(y=120, x=285, anchor="center")
     entry_desconto = customtkinter.CTkEntry(precostab_frame,justify="center", placeholder_text="R$", height=30, width=140, font=("Helvetica", 14,"italic"), corner_radius=40, text_color="white", state="normal")
     entry_desconto.place(y=135, x=215, anchor="nw")
-    valortotal_label = customtkinter.CTkButton(precos_tab, text="",width=410, height=40, fg_color="#242424", border_color="#1f6aa5", border_width=1, corner_radius=40, font=("Berlin Sans FB Demi", 18), hover=False)
-    valortotal_label.place(anchor="center", x=207, y=165)
+    valortotal_label = customtkinter.CTkButton(precos_tab, text="",width=300, height=40, bg_color="#242424", fg_color="#242424", border_color="#1f6aa5", border_width=1, corner_radius=40, font=("Berlin Sans FB Demi", 18), hover=False)
+    valortotal_label.place(anchor="center", x=217, y=290)
 
-    save_btn = customtkinter.CTkButton(windowOR, text="Salvar",width=250, height=40, command=salvar_orcamento, font=("Berlin Sans FB Demi", 22), corner_radius=40)
-    save_btn.place(anchor="center", x=1050, y=680)
-    new_btn = customtkinter.CTkButton(windowOR, text="Novo",width=250, height=40, command=novo_orcamento, font=("Berlin Sans FB Demi", 22), corner_radius=40)
-    new_btn.place(anchor="center", x=790, y=680)
-    new_btn = customtkinter.CTkButton(windowOR, text="Exportar",width=250, height=40, command=exportar_orcamento, font=("Berlin Sans FB Demi", 22), corner_radius=40)
-    new_btn.place(anchor="center", x=530, y=680)
+    new_img = customtkinter.CTkImage(light_image=Image.open("img/new.png"), dark_image=Image.open("img/new.png"), size=(17,17))
+    save_img = customtkinter.CTkImage(light_image=Image.open("img/save.png"), dark_image=Image.open("img/save.png"), size=(17,17))
+    export_img = customtkinter.CTkImage(light_image=Image.open("img/export.png"), dark_image=Image.open("img/export.png"), size=(17,17))
+    print_img = customtkinter.CTkImage(light_image=Image.open("img/print.png"), dark_image=Image.open("img/print.png"), size=(17,17))
+    search_img = customtkinter.CTkImage(light_image=Image.open("img/search.png"), dark_image=Image.open("img/search.png"), size=(15,15))
+
+
+    new_btn = customtkinter.CTkButton(windowOR, text="Novo",width=250, height=40, command=novo_orcamento, font=("Berlin Sans FB Demi", 22), corner_radius=40, image=new_img)
+    new_btn.place(anchor="center", x=155, y=680)
+    save_btn = customtkinter.CTkButton(windowOR, text="Salvar",width=250, height=40, command=salvar_orcamento, font=("Berlin Sans FB Demi", 22), corner_radius=40, image=save_img)
+    save_btn.place(anchor="center", x=415, y=680)
+    export_btn = customtkinter.CTkButton(windowOR, text="Exportar",width=250, height=40, command=exportar_orcamento, font=("Berlin Sans FB Demi", 22), corner_radius=40, image=export_img)
+    export_btn.place(anchor="center", x=675, y=680)
+    print_btn = customtkinter.CTkButton(windowOR, text="Imprimir",width=250, height=40, font=("Berlin Sans FB Demi", 22), corner_radius=40, image=print_img)
+    print_btn.place(anchor="center", x=935, y=680)
+    #share_btn = customtkinter.CTkButton(windowOR, text="Exportar",width=250, height=40, font=("Berlin Sans FB Demi", 22), corner_radius=40)
+    #share_btn.place(anchor="center", x=675, y=680)
+    search_frame =customtkinter.CTkFrame(master=windowOR, width=250, height=40, corner_radius=40, fg_color="#242424", border_width=1, border_color="#1f6aa5")
+    search_frame.place(anchor="center", x=1300, y=680)
+    search_entry = customtkinter.CTkEntry(search_frame, placeholder_text="Pesquisar", width=180, height=30, fg_color="#242424", border_color="#242424")
+    search_entry.place(anchor="center", x=105, y=20)
+    search_btn = customtkinter.CTkButton(search_frame, width=20, height=30, command=search, text="", corner_radius=50, image=search_img)
+    search_btn.place(anchor="center", x=218, y=20)
 
     destroyOR = customtkinter.CTkButton(windowOR, command=destroy_or, text="Voltar", width=250, height=40, fg_color="#242424", border_color="#1f6aa5", border_width=1, corner_radius=40, font=("Berlin Sans FB Demi", 20))
-    destroyOR.place(anchor="center", x=1580, y=680)
+    destroyOR.place(anchor="center", x=1560, y=680)
     entry_dataemissao.focus()
 
 def settings():
@@ -980,8 +1064,8 @@ buttonORC = customtkinter.CTkButton(principal, text="Gerador de Orçamento", com
 buttonORC.place(anchor="center", x=200, y=190)
 destroybtn = customtkinter.CTkButton(principal, border_color="#485F72", border_width=1, text="Encerrar", command=destroy_principal, width=80, height=30, font=("Helvetica", 12, "italic"), corner_radius=40, fg_color="#242424")
 destroybtn.place(anchor="center", x=165, y=275)
-settingsIMG = customtkinter.CTkImage(light_image=Image.open(r"C:\Users\Gustavo Losch\Documents\Repositórios\Script-CIAF\settings.png"),
-                                  dark_image=Image.open(r"C:\Users\Gustavo Losch\Documents\Repositórios\Script-CIAF\settings.png"),
+settingsIMG = customtkinter.CTkImage(light_image=Image.open("img/settings.png"),
+                                  dark_image=Image.open("img/settings.png"),
                                   size=(20, 20))
 settingsbtn = customtkinter.CTkButton(principal, command=settings,border_color="#485F72", border_width=1, text="", width=20, height=30, image=settingsIMG, fg_color="#242424", corner_radius=40)
 settingsbtn.place(anchor="center", x=240, y=275)
