@@ -1,6 +1,6 @@
 import tabula
 import pyautogui
-import time
+import time as tm
 from datetime import *
 import tkinter
 import customtkinter
@@ -37,7 +37,7 @@ def CRWindow():
             print("Rodar")
             runCR.configure(text="O código irá rodar em 5 segundos.",  text_color="green")
             entryCR.configure(state="disabled")
-            time.sleep(5)
+            tm.sleep(5)
 
             tabela = tabula.read_pdf("teste2.pdf", pages="all")[0] #PDF Table read and transform to dataframe
             tabela.rename(columns=tabela.iloc[4], inplace = True)
@@ -52,7 +52,7 @@ def CRWindow():
 
             pyautogui.click(975,1055) #Preparing CIAF to recieve the commands
             pyautogui.click(23,251)
-            time.sleep(1)
+            tm.sleep(1)
 
             os = tabela["DOCTO:"].values #Transforming dataframe to array
             preco = tabela["R$ DEVIDO:"].values
@@ -60,44 +60,44 @@ def CRWindow():
 
             for nos in os:
                 pyautogui.click(1382,537) #Localizar
-                time.sleep(0.5)
+                tm.sleep(0.5)
                 pyautogui.typewrite(nos) #Digitar OS
-                time.sleep(0.5)
+                tm.sleep(0.5)
                 pyautogui.press('enter') #Tabular
                 pyautogui.press('enter') #Confirmar Localizar
-                time.sleep(0.5)
+                tm.sleep(0.5)
                 pyautogui.press('tab') #Tabular para não baixar
-                time.sleep(0.5)
+                tm.sleep(0.5)
                 pyautogui.press('enter') #Confirmar não biaxar
-                time.sleep(0.5)
+                tm.sleep(0.5)
                 pyautogui.click(1381,598) #Clicar em Baixar
-                time.sleep(0.5)
+                tm.sleep(0.5)
                 pyautogui.press('tab')
-                time.sleep(0.5)
+                tm.sleep(0.5)
                 pyautogui.press('enter')
-                time.sleep(0.5)
+                tm.sleep(0.5)
                 pyautogui.press('tab')
-                time.sleep(0.5)
+                tm.sleep(0.5)
                 pyautogui.press('tab') #data
-                time.sleep(0.5)
+                tm.sleep(0.5)
                 pyautogui.typewrite(dataCR)
-                time.sleep(0.5)
+                tm.sleep(0.5)
                 ##pyautogui.press('tab')
-                time.sleep(0.5)
+                tm.sleep(0.5)
                 pyautogui.press('d')
-                time.sleep(0.5)
+                tm.sleep(0.5)
                 pyautogui.press('tab')
-                time.sleep(0.5)
+                tm.sleep(0.5)
                 pyautogui.press('tab')
-                time.sleep(0.5)
+                tm.sleep(0.5)
                 pyautogui.press('tab')
-                time.sleep(0.5)
+                tm.sleep(0.5)
                 pyautogui.typewrite(tabela.iloc[cont,2])
-                time.sleep(0.5)
+                tm.sleep(0.5)
                 pyautogui.press('enter')
-                time.sleep(0.5)
+                tm.sleep(0.5)
                 pyautogui.click(953,590)
-                time.sleep(1)
+                tm.sleep(1)
 
                 print(nos)
                 print(tabela.iloc[cont,2])
@@ -266,9 +266,9 @@ def TBWindow():
 
 def ORWindow():
     windowOR = customtkinter.CTkToplevel(principal)
+    windowOR.geometry("1725x720+95+150")
     principal.iconify()
     windowOR.title("Orçamento")
-    windowOR.geometry("1725x720")
     windowOR.resizable(False, False)
 
     global clientes
@@ -328,13 +328,19 @@ def ORWindow():
             pdf_frame.configure(file=file_name)
 
     def novo_orcamento():
-        global n_orc
+        global orcamento_atual
+
+        new_btn.configure(state="disabled")
+
         with open("config.txt", "r") as config:
             linhas = config.read().splitlines()
 
+        orcamento_atual = int(linhas[2])
         orcamento = int(linhas[2])
         orcamento += 1
+        orcamento_atual += 1
         linhas[2] = str(orcamento)
+
 
         with open("config.txt", "w") as config:
             for linha in linhas:
@@ -369,7 +375,7 @@ def ORWindow():
 
         global valor_total
         global orcamento_atual
-
+        
         def adicionar_servico(df_orc, df_horas, orcamento_atual, servico):
             if df_orc.loc[orcamento_atual, servico] != 0:
                 df_horas.loc[len(df_horas),"Serviço"] = servico.capitalize()
@@ -617,6 +623,9 @@ def ORWindow():
                 writer.writeheader()
                 for orcamento in orcamentos:
                     writer.writerow(orcamento)
+            
+            new_btn.configure(state="normal")
+
             print("Orçamento Salvo")
         except Exception as e:
             print("Erro em Salvamento")
@@ -722,58 +731,84 @@ def ORWindow():
         global orcamento_atual
         searching = search_entry.get()
         orcamento_atual = int(searching)
+        
+        try:
+            entry_dataemissao.insert(0, (orcamentos[orcamento_atual]['data_emissao']))
+            entry_dataemissao.delete(0,'end')
+            entry_dataemissao.insert(0, (orcamentos[orcamento_atual]['data_emissao']))
+            entry_datavalidade.delete(0,'end')
+            entry_datavalidade.insert(0, (orcamentos[orcamento_atual]['data_validade']))
+            nome_cliente.set(orcamentos[orcamento_atual]['nome_cli'])
+            preencher_campos(orcamentos[orcamento_atual]['nome_cli'])
+            description_textbox.delete('0.0','end')
+            description_textbox.insert('0.0', (orcamentos[orcamento_atual]['descricao']))
+            if (orcamentos[orcamento_atual]['time_format']) == "Minutos":
+                tempo.deselect()
+            else:
+                tempo.select()
+            entry_prototp.delete(0,'end')
+            entry_prototp.insert(0, (orcamentos[orcamento_atual]['prototipagem']))
+            entry_desenho.delete(0,'end')
+            entry_desenho.insert(0, (orcamentos[orcamento_atual]['desenho']))
+            entry_molde.delete(0,'end')
+            entry_molde.insert(0, (orcamentos[orcamento_atual]['molde']))
+            fundicao_entry.delete(0,'end')
+            fundicao_entry.insert(0, (orcamentos[orcamento_atual]['fundicao']))
+            montagem_entry.delete(0,'end')
+            montagem_entry.insert(0, (orcamentos[orcamento_atual]['montagem']))
+            acabamentos_entry.delete(0,'end')
+            acabamentos_entry.insert(0, (orcamentos[orcamento_atual]['acabamentos']))
+            polimento_entry.delete(0,'end')
+            polimento_entry.insert(0, (orcamentos[orcamento_atual]['polimento']))
+            limpeza_entry.delete(0,'end')
+            limpeza_entry.insert(0, (orcamentos[orcamento_atual]['limpeza']))
+            cravacao_entry.delete(0,'end')
+            cravacao_entry.insert(0, (orcamentos[orcamento_atual]['cravacao']))
+            ouro1k_entry.delete(0,'end')
+            ouro1k_entry.insert(0, (orcamentos[orcamento_atual]['ouro1k']))
+            ouro750_entry.delete(0,'end')
+            ouro750_entry.insert(0, (orcamentos[orcamento_atual]['ouro750']))
+            ourobranco_entry.delete(0,'end')
+            ourobranco_entry.insert(0, (orcamentos[orcamento_atual]['ouro_branco']))
+            pedras_entry.delete(0,'end')
+            pedras_entry.insert(0, (orcamentos[orcamento_atual]['pedras']))
+            prata_entry.delete(0,'end')
+            prata_entry.insert(0, (orcamentos[orcamento_atual]['prata']))
+            rodio_entry.delete(0,'end')
+            rodio_entry.insert(0, (orcamentos[orcamento_atual]['rodio']))
+            servicost_entry.delete(0,'end')
+            servicost_entry.insert(0, (orcamentos[orcamento_atual]['servicos_terceiros']))
+            cotacao_entry.delete(0,'end')
+            cotacao_entry.insert(0, (orcamentos[orcamento_atual]['cotacao']))
+            precohora_entry.delete(0,'end')
+            precohora_entry.insert(0, (orcamentos[orcamento_atual]['preco_hora']))
+            n_or.configure(text=orcamento_atual)
 
-        entry_dataemissao.delete(0,'end')
-        entry_dataemissao.insert(0, (orcamentos[orcamento_atual]['data_emissao']))
-        entry_datavalidade.delete(0,'end')
-        entry_datavalidade.insert(0, (orcamentos[orcamento_atual]['data_validade']))
-        nome_cliente.set(orcamentos[orcamento_atual]['nome_cli'])
-        preencher_campos(orcamentos[orcamento_atual]['nome_cli'])
-        description_textbox.delete('0.0','end')
-        description_textbox.insert('0.0', (orcamentos[orcamento_atual]['descricao']))
-        if (orcamentos[orcamento_atual]['time_format']) == "Minutos":
-            tempo.deselect()
-        else:
-            tempo.select()
-        entry_prototp.delete(0,'end')
-        entry_prototp.insert(0, (orcamentos[orcamento_atual]['prototipagem']))
-        entry_desenho.delete(0,'end')
-        entry_desenho.insert(0, (orcamentos[orcamento_atual]['desenho']))
-        entry_molde.delete(0,'end')
-        entry_molde.insert(0, (orcamentos[orcamento_atual]['molde']))
-        fundicao_entry.delete(0,'end')
-        fundicao_entry.insert(0, (orcamentos[orcamento_atual]['fundicao']))
-        montagem_entry.delete(0,'end')
-        montagem_entry.insert(0, (orcamentos[orcamento_atual]['montagem']))
-        acabamentos_entry.delete(0,'end')
-        acabamentos_entry.insert(0, (orcamentos[orcamento_atual]['acabamentos']))
-        polimento_entry.delete(0,'end')
-        polimento_entry.insert(0, (orcamentos[orcamento_atual]['polimento']))
-        limpeza_entry.delete(0,'end')
-        limpeza_entry.insert(0, (orcamentos[orcamento_atual]['limpeza']))
-        cravacao_entry.delete(0,'end')
-        cravacao_entry.insert(0, (orcamentos[orcamento_atual]['cravacao']))
-        ouro1k_entry.delete(0,'end')
-        ouro1k_entry.insert(0, (orcamentos[orcamento_atual]['ouro1k']))
-        ouro750_entry.delete(0,'end')
-        ouro750_entry.insert(0, (orcamentos[orcamento_atual]['ouro750']))
-        ourobranco_entry.delete(0,'end')
-        ourobranco_entry.insert(0, (orcamentos[orcamento_atual]['ouro_branco']))
-        pedras_entry.delete(0,'end')
-        pedras_entry.insert(0, (orcamentos[orcamento_atual]['pedras']))
-        prata_entry.delete(0,'end')
-        prata_entry.insert(0, (orcamentos[orcamento_atual]['prata']))
-        rodio_entry.delete(0,'end')
-        rodio_entry.insert(0, (orcamentos[orcamento_atual]['rodio']))
-        servicost_entry.delete(0,'end')
-        servicost_entry.insert(0, (orcamentos[orcamento_atual]['servicos_terceiros']))
-        cotacao_entry.delete(0,'end')
-        cotacao_entry.insert(0, (orcamentos[orcamento_atual]['cotacao']))
-        precohora_entry.delete(0,'end')
-        precohora_entry.insert(0, (orcamentos[orcamento_atual]['preco_hora']))
-        n_or.configure(text=orcamento_atual)
+            print("Busca realizada com sucesso")
+        except:
+            def icon():
+                aviso.destroy()
+                search_entry.delete(0, 'end')
+            aviso = customtkinter.CTkToplevel(windowOR)
+            aviso.geometry("300x150")
+            aviso.deiconify()
+            aviso_label = customtkinter.CTkLabel(aviso, text="O arquivo pesquisado não existe.")
+            aviso_label.pack(pady=30)
+            aviso_btn = customtkinter.CTkButton(aviso, text="Tentar novamente", command=icon, corner_radius=40)
+            aviso_btn.pack(pady=5)
+            tm.sleep(1)
+            
+    def scrolldown_t(event):
+        tempo_inframe._parent_canvas.yview_moveto(1)
+    
+    def scrolldown_o(event):
+        material_inframe._parent_canvas.yview_moveto(0.35)
 
-        print("Busca realizada com sucesso")
+    def scrolldown_r(event):
+        material_inframe._parent_canvas.yview_moveto(1)
+
+    def tabulation_d(event):
+        entry_prototp.focus_force()
 
     def destroy_or():
         principal.deiconify()
@@ -992,6 +1027,10 @@ def ORWindow():
 
     destroyOR = customtkinter.CTkButton(windowOR, command=destroy_or, text="Voltar", width=250, height=40, fg_color="#242424", border_color="#1f6aa5", border_width=1, corner_radius=40, font=("Berlin Sans FB Demi", 20))
     destroyOR.place(anchor="center", x=1560, y=680)
+    description_textbox.bind("<Tab>", tabulation_d)
+    montagem_entry.bind("<FocusOut>", scrolldown_t)
+    ouro750_entry.bind("<FocusOut>", scrolldown_o)
+    rodio_entry.bind("<FocusOut>", scrolldown_r)
     entry_dataemissao.focus()
 
 def settings():
@@ -1048,10 +1087,10 @@ def destroy_principal():
     principal.destroy()
 
 principal = customtkinter.CTk()
+principal.geometry("400x300+760+390")
 principal.deiconify()
 customtkinter.set_appearance_mode("dark")
 principal.title("GScript for CIAF")
-principal.geometry("400x300")
 principal.resizable(False, False)
 
 titleMain = customtkinter.CTkLabel(principal, text="GScript for CIAF", font=("Berlin Sans FB Demi", 28))

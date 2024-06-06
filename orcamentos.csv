@@ -1,6 +1,3 @@
 n_orc,data_emissao,data_validade,nome_cli,descricao,time_format,prototipagem,desenho,molde,fundicao,montagem,acabamentos,polimento,limpeza,cravacao,ouro1k,ouro750,ouro_branco,pedras,prata,rodio,servicos_terceiros,cotacao,preco_hora
-0,02/06/2024,09/06/2024,Teste,"Teste. Teste. Teste. Teste. Teste. Teste. Teste.
-",Minutos,10,10,10,10,10,10,10,10,10,,10,,,,,,300,50
-1,05/06/2024,12/06/2024,Julia Dallarosa,"Brinco em metal branco para Julia.	
-
-",Minutos,60,30,,15,15,15,10,10,,,,,,5,5,40,5,50
+0,06/06/2024,13/06/2024,Elaine Losch,"CS Brinco em metal amarelo para consertar fecho.
+",Minutos,,,,,15,10,10,5,,,0.2,,,,,,280,70
