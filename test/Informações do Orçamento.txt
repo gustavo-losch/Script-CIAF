@@ -31,13 +31,16 @@ Material:
 -Prata
 -Ródio
 -Serviços de Terceiros
+-Acessórios (valor) -add
+-Corrente (tamanho) (peso) (material) (valor) -add
 
 Pedras: 
 -Nome da Pedra
 -Quantidade
 -Pontos
--Quilatagem
-Preço (por pedra / total)
+-Quilatagem (Cts)
+-Preço (por pedra)
+preco total (quantidade * preco por pedra) -add
 
 Preços:
 -Preço por hora trabalhada
@@ -53,6 +56,7 @@ Preços:
 __________________________________________
 
 pesquisar orçamento
+pesquisar por nome;
 novo orçamento
 Salvar orçamento
 Exportar orçamento (salva e exporta)

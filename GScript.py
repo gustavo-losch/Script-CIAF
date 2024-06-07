@@ -445,6 +445,8 @@ def ORWindow():
 
         df_descricao = pd.DataFrame({"Descrição do Projeto": [df_orc.loc[orcamento_atual,"descricao"]]})
 
+        df_status = pd.DataFrame({"Status": ["","Aprovado","","Reprovado",""], "Data":["","  /    /  ","","  /    /  ",""]})
+
         # Criação do PDF com reportlab
         styles = getSampleStyleSheet()
 
@@ -492,6 +494,19 @@ def ORWindow():
             ('BOX', (0, 0), (-1, -1), 1, colors.black),
             ('GRID', (0, 0), (-1, -1), 0.25, colors.grey)
         ])
+
+        style = TableStyle([
+            ('ALIGN', (0,0), (-1,-1), 'CENTER'),
+            ('VALIGN', (0,0), (-1,-1), 'MIDDLE')
+            ])
+
+        status_style = TableStyle([
+            ('ALIGN', (0,0), (-1,-1), 'CENTER'),
+            ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+            ('FONT', (-1, -1), (-1, -1), 'Helvetica-Bold', 12),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('BOX', (0, 0), (-1, -1), 1, colors.black)
+            ])
 
 
         def myFirstPage(canvas, doc):
@@ -549,13 +564,22 @@ def ORWindow():
         tabela_materiais._argW[2] = 2.5 * inch
 
         data_final = [df_valorfinal.columns.to_list()] + df_valorfinal.values.tolist()
-        tabela_valorfinal = Table(data_final)
+        tabela_valorfinal = Table(data_final, colWidths=[255]*2)
         tabela_valorfinal.setStyle(table_style_final)
-        tabela_valorfinal._argW[0] = 5 * inch
-        tabela_valorfinal._argW[1] = 2.5 * inch
+        tabela_valorfinal._argW[0] = 2 * inch
+        tabela_valorfinal._argW[1] = 1.6 * inch
+
+        data_status = [df_status.columns.to_list()] + df_status.values.tolist()
+        tabela_status = Table(data_status, colWidths=[255]*2)
+        tabela_status.setStyle(status_style)
+        tabela_status._argW[0] = 2 * inch
+        tabela_status._argW[1] = 1.6 * inch
+
+        tabela_externa = Table([[tabela_status, Spacer(20, 20), tabela_valorfinal]], colWidths=[255, 22, 255])
+        tabela_externa.setStyle(style)
 
         elements = [title, Spacer(1, 10), tabela_descricao, Spacer(1, 5), linha, tabela_clientes, tabela_datas, linha, Spacer(1, 15),
-                    tabela_servicos, Spacer(1, 20), tabela_materiais, Spacer(20, 20), tabela_valorfinal]
+                    tabela_servicos, Spacer(1, 20), tabela_materiais, Spacer(1,20), tabela_externa]
         doc.build(elements)
         
     def salvar_orcamento():
@@ -1012,9 +1036,9 @@ def ORWindow():
     entry_desconto = customtkinter.CTkEntry(precostab_frame,justify="center", placeholder_text="R$", height=30, width=140, font=("Helvetica", 14,"italic"), corner_radius=40, text_color="white", state="normal")
     entry_desconto.place(y=145, x=215, anchor="nw")
     separator_p = customtkinter.CTkLabel(precos_tab, text="_______________________________________________________________", font=("Helvetica",8), text_color="#343638", bg_color="#242424")
-    separator_p.place(anchor="center", x=215, y=265)
+    separator_p.place(anchor="center", x=215, y=410)
     valortotal_label = customtkinter.CTkButton(precos_tab, text="R$ 1400,00",width=300, height=40, bg_color="#242424", fg_color="#242424", border_color="#1f6aa5", border_width=1, corner_radius=25, font=("Berlin Sans FB Demi", 22), hover=False)
-    valortotal_label.place(anchor="center", x=217, y=315)
+    valortotal_label.place(anchor="center", x=217, y=460)
 
     new_img = customtkinter.CTkImage(light_image=Image.open("img/new.png"), dark_image=Image.open("img/new.png"), size=(17,17))
     save_img = customtkinter.CTkImage(light_image=Image.open("img/save.png"), dark_image=Image.open("img/save.png"), size=(17,17))
