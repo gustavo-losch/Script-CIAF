@@ -436,8 +436,12 @@ def ORWindow():
 
         df_informacoes_data = pd.DataFrame({"Data de Emissão": [df_orc.loc[orcamento_atual,"data_emissao"]], "Data de Validade": [df_orc.loc[orcamento_atual,"data_validade"]], "Validade": ["7 dias úteis"]})
 
-        valor_total = format(float(df_materiais.loc[len(df_materiais)-1, "Valor"]) + float(df_horas.loc[len(df_horas)-1, "Valor"]), ".2f")
-        df_valorfinal = pd.DataFrame({"Preços":["Subtotal", "Lucro:  "+"%", "Frete","Desconto", "Total"], "R$": [valor_total, "", "", "", valor_total]})
+        valor_subtotal = format(float(df_materiais.loc[len(df_materiais)-1, "Valor"]) + float(df_horas.loc[len(df_horas)-1, "Valor"]))
+        valor_lucro = format(float(df_horas.loc[len(df_horas)-1, "Valor"]) * float(df_orc.loc[orcamento_atual, "taxa_lucro"]), ".2f")
+        valor_frete = format(float(df_orc.loc[orcamento_atual, "frete"]), ".2f")
+        valor_desconto = format(float(df_orc.loc[orcamento_atual, "desconto"]), ".2f")
+        valor_total = format(float(df_materiais.loc[len(df_materiais)-1, "Valor"]) + float(df_horas.loc[len(df_horas)-1, "Valor"]) + float(valor_lucro) + float(valor_frete) - float(valor_desconto), ".2f")
+        df_valorfinal = pd.DataFrame({"Preços":["Subtotal", "Lucro:  "+str(format(df_orc.loc[orcamento_atual, "taxa_lucro"] * 100, ".1f"))+"%", "Frete","Desconto", "Total"], "R$": [valor_subtotal, valor_lucro, valor_frete, valor_desconto, valor_total]})
 
         df_descricao = pd.DataFrame({"Descrição do Projeto": [df_orc.loc[orcamento_atual,"descricao"]]})
 
@@ -551,7 +555,7 @@ def ORWindow():
         tabela_valorfinal._argW[1] = 2.5 * inch
 
         elements = [title, Spacer(1, 10), tabela_descricao, Spacer(1, 5), linha, tabela_clientes, tabela_datas, linha, Spacer(1, 15),
-                    tabela_servicos, Spacer(1, 20), tabela_materiais, Spacer(1, 20), tabela_valorfinal]
+                    tabela_servicos, Spacer(1, 20), tabela_materiais, Spacer(20, 20), tabela_valorfinal]
         doc.build(elements)
         
     def salvar_orcamento():
@@ -587,6 +591,10 @@ def ORWindow():
             servicos_terceiros = servicost_entry.get()
             cotacao = cotacao_entry.get()
             preco_hora = precohora_entry.get()
+            taxa_lucro = lucro_entry.get()
+            taxa_lucro = float(taxa_lucro) / 100
+            frete = entry_frete.get()
+            desconto = entry_desconto.get()
 
             orcamento = {"n_orc": n_orc,
                         "data_emissao": data_emissao,
@@ -611,7 +619,11 @@ def ORWindow():
                         "rodio":rodio,
                         "servicos_terceiros":servicos_terceiros,
                         "cotacao":cotacao,
-                        "preco_hora":preco_hora}
+                        "preco_hora":preco_hora,
+                        "taxa_lucro":taxa_lucro,
+                        "frete": frete,
+                        "desconto": desconto
+                        }
             
             if orcamento_atual < len(orcamentos):
                 orcamentos[orcamento_atual] = orcamento
@@ -619,7 +631,7 @@ def ORWindow():
                 orcamentos.append(orcamento)
 
             with open("orcamentos.csv", mode='w', newline='') as orc:
-                writer = csv.DictWriter(orc, fieldnames=["n_orc","data_emissao","data_validade","nome_cli","descricao","time_format","prototipagem","desenho","molde","fundicao","montagem","acabamentos","polimento","limpeza","cravacao","ouro1k","ouro750","ouro_branco","pedras","prata","rodio","servicos_terceiros","cotacao","preco_hora"])
+                writer = csv.DictWriter(orc, fieldnames=["n_orc","data_emissao","data_validade","nome_cli","descricao","time_format","prototipagem","desenho","molde","fundicao","montagem","acabamentos","polimento","limpeza","cravacao","ouro1k","ouro750","ouro_branco","pedras","prata","rodio","servicos_terceiros","cotacao","preco_hora","taxa_lucro","frete","desconto"])
                 writer.writeheader()
                 for orcamento in orcamentos:
                     writer.writerow(orcamento)
@@ -809,6 +821,7 @@ def ORWindow():
 
     def tabulation_d(event):
         entry_prototp.focus_force()
+        return "break"
 
     def destroy_or():
         principal.deiconify()
@@ -981,9 +994,9 @@ def ORWindow():
     precostab_frame = customtkinter.CTkFrame(master=precos_tab, width=408, height=440, fg_color="#242424", corner_radius=20, border_color="#1f6aa5", border_width=1)
     precostab_frame.place(anchor="nw", x=10, y=60)
     cotacaometal_label = customtkinter.CTkLabel(precostab_frame, text="Lucro - Sobre a mão de obra.", font=("Helvetica",14,"bold"))
-    cotacaometal_label.place(anchor="center", x=207, y=20)
+    cotacaometal_label.place(anchor="center", x=207, y=30)
     lucro_frame = customtkinter.CTkFrame(master=precostab_frame, width=300, height= 50, fg_color="#1f6aa5", corner_radius=40)
-    lucro_frame.place(anchor="center", x=207, y=65)
+    lucro_frame.place(anchor="center", x=207, y=75)
     lucro_slider = customtkinter.CTkSlider(lucro_frame, command=sliding_lucro,width=195, height=20, from_=0, to=100, number_of_steps=200, button_color="#d5d9de", button_hover_color="white")
     lucro_slider.place(anchor="w", x=10,y=25)
     lucro_slider.set(12)
@@ -991,15 +1004,17 @@ def ORWindow():
     lucro_entry.place(anchor="w", x=210,y=25)
     lucro_entry.bind("<FocusOut>", entry_lucro)
     labelfrete = customtkinter.CTkLabel(precostab_frame, text="Frete", font=("Helvetica", 14, "bold"))
-    labelfrete.place(y=120, x=130, anchor="center")
+    labelfrete.place(y=130, x=130, anchor="center")
     entry_frete = customtkinter.CTkEntry(precostab_frame,justify="center", placeholder_text="R$", height=30, width=140, font=("Helvetica", 14,"italic"), corner_radius=40, text_color="white", state="normal")
-    entry_frete.place(y=135, x=60, anchor="nw")
+    entry_frete.place(y=145, x=60, anchor="nw")
     labeldesconto = customtkinter.CTkLabel(precostab_frame, text="Desconto", font=("Helvetica", 14, "bold"))
-    labeldesconto.place(y=120, x=285, anchor="center")
+    labeldesconto.place(y=130, x=285, anchor="center")
     entry_desconto = customtkinter.CTkEntry(precostab_frame,justify="center", placeholder_text="R$", height=30, width=140, font=("Helvetica", 14,"italic"), corner_radius=40, text_color="white", state="normal")
-    entry_desconto.place(y=135, x=215, anchor="nw")
-    valortotal_label = customtkinter.CTkButton(precos_tab, text="",width=300, height=40, bg_color="#242424", fg_color="#242424", border_color="#1f6aa5", border_width=1, corner_radius=40, font=("Berlin Sans FB Demi", 18), hover=False)
-    valortotal_label.place(anchor="center", x=217, y=290)
+    entry_desconto.place(y=145, x=215, anchor="nw")
+    separator_p = customtkinter.CTkLabel(precos_tab, text="_______________________________________________________________", font=("Helvetica",8), text_color="#343638", bg_color="#242424")
+    separator_p.place(anchor="center", x=215, y=265)
+    valortotal_label = customtkinter.CTkButton(precos_tab, text="R$ 1400,00",width=300, height=40, bg_color="#242424", fg_color="#242424", border_color="#1f6aa5", border_width=1, corner_radius=25, font=("Berlin Sans FB Demi", 22), hover=False)
+    valortotal_label.place(anchor="center", x=217, y=315)
 
     new_img = customtkinter.CTkImage(light_image=Image.open("img/new.png"), dark_image=Image.open("img/new.png"), size=(17,17))
     save_img = customtkinter.CTkImage(light_image=Image.open("img/save.png"), dark_image=Image.open("img/save.png"), size=(17,17))

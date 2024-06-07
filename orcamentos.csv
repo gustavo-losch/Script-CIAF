@@ -1,3 +1,6 @@
-n_orc,data_emissao,data_validade,nome_cli,descricao,time_format,prototipagem,desenho,molde,fundicao,montagem,acabamentos,polimento,limpeza,cravacao,ouro1k,ouro750,ouro_branco,pedras,prata,rodio,servicos_terceiros,cotacao,preco_hora
+n_orc,data_emissao,data_validade,nome_cli,descricao,time_format,prototipagem,desenho,molde,fundicao,montagem,acabamentos,polimento,limpeza,cravacao,ouro1k,ouro750,ouro_branco,pedras,prata,rodio,servicos_terceiros,cotacao,preco_hora,taxa_lucro,frete,desconto
 0,06/06/2024,13/06/2024,Elaine Losch,"CS Brinco em metal amarelo para consertar fecho.
-",Minutos,,,,,15,10,10,5,,,0.2,,,,,,280,70
+",Minutos,,,,,15,10,10,5,,,0.2,,,,,,280,70,,,
+1,07/06/2024,14/06/2024,Gustavo Losch do Amaral,"CS Corrente em metal amarelo para soldar.
+
+",Minutos,,,,,20,10,10,10,,,0.25,,,,,,280,50,0.2,15,
