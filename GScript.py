@@ -39,7 +39,7 @@ def CRWindow():
             entryCR.configure(state="disabled")
             tm.sleep(5)
 
-            tabela = tabula.read_pdf("teste2.pdf", pages="all")[0] #PDF Table read and transform to dataframe
+            tabela = tabula.read_pdf("baixar.pdf", pages="all")[0] #PDF Table read and transform to dataframe
             tabela.rename(columns=tabela.iloc[4], inplace = True)
             tabela = tabela[['DOCTO:', 'VENCIMENTO:', 'R$ DEVIDO:']]
             tabela = tabela.drop(0)
@@ -60,42 +60,42 @@ def CRWindow():
 
             for nos in os:
                 pyautogui.click(1382,537) #Localizar
-                tm.sleep(0.5)
+                tm.sleep(0.3)
                 pyautogui.typewrite(nos) #Digitar OS
-                tm.sleep(0.5)
+                tm.sleep(0.3)
                 pyautogui.press('enter') #Tabular
                 pyautogui.press('enter') #Confirmar Localizar
-                tm.sleep(0.5)
+                tm.sleep(0.3)
                 pyautogui.press('tab') #Tabular para não baixar
-                tm.sleep(0.5)
+                tm.sleep(0.3)
                 pyautogui.press('enter') #Confirmar não biaxar
-                tm.sleep(0.5)
+                tm.sleep(0.3)
                 pyautogui.click(1381,598) #Clicar em Baixar
-                tm.sleep(0.5)
+                tm.sleep(0.3)
                 pyautogui.press('tab')
-                tm.sleep(0.5)
+                tm.sleep(0.3)
                 pyautogui.press('enter')
-                tm.sleep(0.5)
+                tm.sleep(0.3)
                 pyautogui.press('tab')
-                tm.sleep(0.5)
+                tm.sleep(0.3)
                 pyautogui.press('tab') #data
-                tm.sleep(0.5)
+                tm.sleep(0.3)
                 pyautogui.typewrite(dataCR)
-                tm.sleep(0.5)
+                tm.sleep(0.3)
                 ##pyautogui.press('tab')
-                tm.sleep(0.5)
+                tm.sleep(0.3)
                 pyautogui.press('d')
-                tm.sleep(0.5)
+                tm.sleep(0.3)
                 pyautogui.press('tab')
-                tm.sleep(0.5)
+                tm.sleep(0.3)
                 pyautogui.press('tab')
-                tm.sleep(0.5)
+                tm.sleep(0.3)
                 pyautogui.press('tab')
-                tm.sleep(0.5)
+                tm.sleep(0.3)
                 pyautogui.typewrite(tabela.iloc[cont,2])
-                tm.sleep(0.5)
+                tm.sleep(0.3)
                 pyautogui.press('enter')
-                tm.sleep(0.5)
+                tm.sleep(0.3)
                 pyautogui.click(953,590)
                 tm.sleep(1)
 
@@ -141,7 +141,7 @@ def TBWindow():
         datai = entryTB1.get()
         dataf = entryTB2.get()
         # Abrindo arquivo DBF e criando o DataFrame
-        path = ''r'C:\Users\Oficina\Desktop\Gustavo\Repositórios\Script-CIAF\Conversão\ORDEM-SERV.DBF'
+        path = 'ciaf-files/ORDEM-SERV.DBF'
         dbf = DBF(path)
         dataResult = pd.DataFrame(iter(dbf))
 
@@ -231,12 +231,16 @@ def TBWindow():
             data = [df.columns.to_list()] + df.values.tolist()
             table = Table(data)
             table.setStyle(table_style)
+            table._argW[0] = 1.8 * inch
+            table._argW[1] = 1.8 * inch
+            table._argW[2] = 1.8 * inch
+            table._argW[3] = 1.8 * inch
 
             text_below_table = "Tabela de preços dos serviços prestados."
             text_paragraph = Paragraph(text_below_table, subtitle_style)
 
             #Criação do arquivo e build dos elementos
-            doc = SimpleDocTemplate(r"C:\Users\Oficina\Desktop\Extratos Bergerson - GScript\Tabela Bergerson.pdf", pagesize=letter)
+            doc = SimpleDocTemplate("Tabela Bergerson.pdf", pagesize=letter)
 
             elements = [title, date_range, Spacer(1,35) , table, Spacer(1,15),text_paragraph, Spacer(1,30), footer]
             doc.build(elements)
@@ -1148,8 +1152,8 @@ settingsIMG = customtkinter.CTkImage(light_image=Image.open("img/settings.png"),
 settingsbtn = customtkinter.CTkButton(principal, command=settings,border_color="#485F72", border_width=1, text="", width=20, height=30, image=settingsIMG, fg_color="#242424", corner_radius=40)
 settingsbtn.place(anchor="center", x=240, y=275)
 
-shutil.copy(r"C:/Ciaf/Dados/ORDEM-SERV.DBF", r"C:\Users\Gustavo Losch\Documents\Repositórios\Script-CIAF\ciaf-files")
-shutil.copy(r"C:/Ciaf/Dados/ordem-serv.FPT", r"C:\Users\Gustavo Losch\Documents\Repositórios\Script-CIAF\ciaf-files")
+shutil.copy(r"C:/Ciaf/Dados/ORDEM-SERV.DBF", "ciaf-files")
+shutil.copy(r"C:/Ciaf/Dados/ordem-serv.FPT", "ciaf-files")
 clientes = []
 
 principal.mainloop()
