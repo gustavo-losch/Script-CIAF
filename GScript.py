@@ -408,7 +408,7 @@ def ORWindow():
         total_horas = df_horas["Horas Trabalhadas"].replace('', '0').astype(float).sum()
         df_horas.loc[len(df_horas)] = ['Total', format(total_horas, ".2f"), format(total, ".2f")]
 
-        df_cli = pd.read_csv(r"C:\Users\Gustavo Losch\Documents\Repositórios\Script-CIAF\clientes.csv", encoding="ISO-8859-1")
+        df_cli = pd.read_csv("clientes.csv", encoding="ISO-8859-1")
         df_cli = df_cli.fillna(0)
 
         cliente = df_orc.loc[orcamento_atual,"nome_cli"]
@@ -758,7 +758,6 @@ def ORWindow():
         precohora_slider.set(float(cotacao))
     
     def sliding_lucro(value): #revisar
-
         value = format(value, '.2f')
         lucro_entry.delete("0", 'end')
         lucro_entry.insert("0", value)
@@ -850,6 +849,52 @@ def ORWindow():
     def tabulation_d(event):
         entry_prototp.focus_force()
         return "break"
+
+    def atualizar_valor_subtotal(event):
+        try:
+            prototipagem = round(float(entry_prototp.get()), 2) if entry_prototp.get() else 0.00
+            desenho = round(float(entry_desenho.get()), 2) if entry_desenho.get() else 0.00
+            molde = round(float(entry_molde.get()), 2) if entry_molde.get() else 0.00
+            fundicao = round(float(fundicao_entry.get()), 2) if fundicao_entry.get() else 0.00
+            montagem = round(float(montagem_entry.get()), 2) if montagem_entry.get() else 0.00
+            acabamentos = round(float(acabamentos_entry.get()), 2) if acabamentos_entry.get() else 0.00
+            polimento = round(float(polimento_entry.get()), 2) if polimento_entry.get() else 0.00
+            limpeza = round(float(limpeza_entry.get()), 2) if limpeza_entry.get() else 0.00
+            cravacao = round(float(cravacao_entry.get()), 2) if cravacao_entry.get() else 0.00
+
+            ouro1k = round(float(ouro1k_entry.get()), 2) if ouro1k_entry.get() else 0.00
+            ouro750 = round(float(ouro750_entry.get()), 2) if ouro750_entry.get() else 0.00
+            ourobranco = round(float(ourobranco_entry.get()), 2) if ourobranco_entry.get() else 0.00
+            prata = round(float(prata_entry.get()), 2) if prata_entry.get() else 0.00
+            pedras = round(float(pedras_entry.get()), 2) if pedras_entry.get() else 0.00
+            rodio = round(float(rodio_entry.get()), 2) if rodio_entry.get() else 0.00
+            servicos_terceiros = round(float(servicost_entry.get()), 2) if servicost_entry.get() else 0.00
+            cotacao = round(float(cotacao_entry.get()), 2) if cotacao_entry.get() else 0.00
+            preco_hora = round(float(precohora_entry.get()), 2) if precohora_entry.get() else 0.00
+            lucro_mo = round(float(lucro_slider.get())/100, 2) if lucro_slider.get() else 0.00
+            frete = round(float(entry_frete.get()), 2) if entry_frete.get() else 0.00
+
+            # Calcular valor total do Tempo Trabalhado
+            horas_trabalhadas = (prototipagem + desenho + molde + fundicao + montagem + acabamentos + polimento + limpeza + cravacao) / 60 if tempo.get() == "Minutos" else (prototipagem + desenho + molde + fundicao + montagem + acabamentos + polimento + limpeza + cravacao)
+            valor_horas = horas_trabalhadas * preco_hora
+            lucro = valor_horas*lucro_mo
+
+            # Calcular valor total do Material Utilizado
+            valor_ouro1k = ouro1k * cotacao
+            valor_ouro750 = ouro750 * cotacao
+            valor_ourobranco = ourobranco * cotacao
+            valor_prata = prata * cotacao
+            valor_materiais = valor_ouro1k + valor_ouro750 + valor_ourobranco + valor_prata + pedras + rodio + servicos_terceiros
+
+            # Calcular valor subtotal
+            valor_subtotal = valor_horas + valor_materiais + lucro + frete
+
+            # Atualizar label com o novo valor subtotal
+            valortotal_label.configure(text=f"R$ {valor_subtotal:.2f}")
+
+        except ValueError:
+            # Exibir mensagem de erro se os valores não forem numéricos
+            print("Erro: Por favor, digite valores numéricos para todos os campos.")
 
     def destroy_or():
         principal.deiconify()
@@ -1041,7 +1086,7 @@ def ORWindow():
     entry_desconto.place(y=145, x=215, anchor="nw")
     separator_p = customtkinter.CTkLabel(precos_tab, text="_______________________________________________________________", font=("Helvetica",8), text_color="#343638", bg_color="#242424")
     separator_p.place(anchor="center", x=215, y=410)
-    valortotal_label = customtkinter.CTkButton(precos_tab, text="R$ 1400,00",width=300, height=40, bg_color="#242424", fg_color="#242424", border_color="#1f6aa5", border_width=1, corner_radius=25, font=("Berlin Sans FB Demi", 22), hover=False)
+    valortotal_label = customtkinter.CTkButton(precos_tab, text="R$ ",width=300, height=40, bg_color="#242424", fg_color="#242424", border_color="#1f6aa5", border_width=1, corner_radius=25, font=("Berlin Sans FB Demi", 22), hover=False)
     valortotal_label.place(anchor="center", x=217, y=460)
 
     new_img = customtkinter.CTkImage(light_image=Image.open("img/new.png"), dark_image=Image.open("img/new.png"), size=(17,17))
@@ -1074,6 +1119,7 @@ def ORWindow():
     montagem_entry.bind("<FocusOut>", scrolldown_t)
     ouro750_entry.bind("<FocusOut>", scrolldown_o)
     rodio_entry.bind("<FocusOut>", scrolldown_r)
+    entry_frete.bind("<FocusOut>", atualizar_valor_subtotal)
     entry_dataemissao.focus()
 
 def settings():
@@ -1152,8 +1198,8 @@ settingsIMG = customtkinter.CTkImage(light_image=Image.open("img/settings.png"),
 settingsbtn = customtkinter.CTkButton(principal, command=settings,border_color="#485F72", border_width=1, text="", width=20, height=30, image=settingsIMG, fg_color="#242424", corner_radius=40)
 settingsbtn.place(anchor="center", x=240, y=275)
 
-shutil.copy(r"C:/Ciaf/Dados/ORDEM-SERV.DBF", "ciaf-files")
-shutil.copy(r"C:/Ciaf/Dados/ordem-serv.FPT", "ciaf-files")
+#shutil.copy(r"C:/Ciaf/Dados/ORDEM-SERV.DBF", "ciaf-files")
+#shutil.copy(r"C:/Ciaf/Dados/ordem-serv.FPT", "ciaf-files")
 clientes = []
 
 principal.mainloop()
