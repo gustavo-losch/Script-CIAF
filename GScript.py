@@ -130,7 +130,7 @@ def TBWindow():
     windowTB = customtkinter.CTkToplevel(principal)
     principal.iconify()
     windowTB.title("Tabela Bergerson")
-    windowTB.geometry("400x300")
+    windowTB.geometry("400x300+800+340")
     windowTB.resizable(False, False)
 
     def destroy_tb():
@@ -150,8 +150,8 @@ def TBWindow():
         tabela.loc[:, 'DATAFECHA'] = pd.to_datetime(tabela['DATAFECHA'], errors='coerce')
 
         #Inputs dos intervalos de data para aplicar filtro
-        data_inicial = pd.to_datetime(datai)
-        data_final = pd.to_datetime(dataf)
+        data_inicial = datetime.strptime(datai, '%d/%m/%Y')
+        data_final = datetime.strptime(dataf, '%d/%m/%Y')
 
         #Filtros de cliente e data
         df_filtrado = tabela[(tabela['DATAFECHA'] >= data_inicial) & (tabela['DATAFECHA'] <= data_final)]
